@@ -1,4 +1,3 @@
-import * as tlib from "wc3-treelib";
 export class OzMissile {
   private static readonly REFRESH_RATE = 1 / 40; // Update once every 40 frames
   private static readonly SWEET_SPOT = 300; // Maximum amount of missile to process
