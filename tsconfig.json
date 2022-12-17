@@ -3,9 +3,7 @@
     "baseUrl": "./src",
     "allowJs": true,
     "target": "es6",
-    "lib": [
-      "es6"
-    ],
+    "lib": ["es6"],
     "moduleResolution": "classic",
     "paths": {
       "*": [
@@ -37,12 +35,11 @@
       "war3-types/core/blizzard",
       "war3-types/core/commonai",
       "war3-types/core/polyfill",
-      "war3-types/special/w3ts"
+      "war3-types/special/w3ts",
+      "wc3-treelib"
     ]
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "exclude": [],
   "tstl": {
     "luaTarget": "5.3",
