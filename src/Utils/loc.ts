@@ -1,16 +1,23 @@
 const zeroLoc = Location(0, 0);
 const zeroRect = Rect(0, 0, 0, 0);
 var cacheCC = {};
-export function LocGetZ(x, y) {
-  MoveLocation(zeroLoc, x, y);
+export function LocGetZ(atX: number, atY: number) {
+  MoveLocation(zeroLoc, atX, atY);
   return GetLocationZ(zeroLoc);
 }
 
-export function SetUnitZ(u: unit, z: number) {
-  SetUnitFlyHeight(u, z - LocGetZ(GetUnitX(u), GetUnitY(u)), 0);
+export function SetUnitZ(whichUnit: unit, newZ: number) {
+  SetUnitFlyHeight(
+    whichUnit,
+    newZ - LocGetZ(GetUnitX(whichUnit), GetUnitY(whichUnit)),
+    0
+  );
 }
 
-export function FastCC(s: string) {
+export function FastCC(s: string): number {
   if (s.length > 4) return;
-  return !cacheCC[s] ? FourCC(s) : cacheCC[s];
+  if (!cacheCC[s]) {
+    cacheCC[s] = FourCC(s);
+  }
+  return cacheCC[s];
 }
