@@ -6,47 +6,47 @@ const p = Player(PLAYER_NEUTRAL_PASSIVE);
 export const DUMMY_ID = FourCC("dumi");
 export const DUMMY_ABIL = FourCC("Amrf");
 export class Pool {
-  static recycle(u: unit) {
-    if (GetUnitTypeId(u) != DUMMY_ID) return;
-    GroupAddUnit(g, u);
-    SetUnitX(u, 0);
-    SetUnitY(u, 0);
-    BlzPauseUnitEx(u, true);
-  }
+	static recycle(u: unit) {
+		if (GetUnitTypeId(u) != DUMMY_ID) return;
+		GroupAddUnit(g, u);
+		SetUnitX(u, 0);
+		SetUnitY(u, 0);
+		BlzPauseUnitEx(u, true);
+	}
 
-  static retrieve(x: number, y: number, z: number, face: number) {
-    if (BlzGroupGetSize(g) == 0) {
-      let u = CreateUnit(p, DUMMY_ID, x, y, face);
-      SetUnitZ(u, z);
-      UnitRemoveAbility(u, DUMMY_ABIL);
-      return u;
-    }
-    let u = BlzGroupUnitAt(g, 0);
-    GroupRemoveUnit(g, u);
-    SetUnitX(u, x);
-    SetUnitY(u, y);
-    SetUnitZ(u, z);
-    BlzSetUnitFacingEx(u, face);
-    return u;
-  }
+	static retrieve(x: number, y: number, z: number, face: number) {
+		if (BlzGroupGetSize(g) == 0) {
+			let u = CreateUnit(p, DUMMY_ID, x, y, face);
+			SetUnitZ(u, z);
+			UnitRemoveAbility(u, DUMMY_ABIL);
+			return u;
+		}
+		let u = BlzGroupUnitAt(g, 0);
+		GroupRemoveUnit(g, u);
+		SetUnitX(u, x);
+		SetUnitY(u, y);
+		SetUnitZ(u, z);
+		BlzSetUnitFacingEx(u, face);
+		return u;
+	}
 
-  static delay(u: unit, time: number) {
-    if (GetUnitTypeId(u) != DUMMY_ID) return;
-    let t = new Timer();
-    t.start(time, false, () => {
-      Pool.recycle(u);
-      t.destroy();
-    });
-  }
+	static delay(u: unit, time: number) {
+		if (GetUnitTypeId(u) != DUMMY_ID) return;
+		let t = new Timer();
+		t.start(time, false, () => {
+			Pool.recycle(u);
+			t.destroy();
+		});
+	}
 }
 
 const onInit = () => {
-  for (let i = 0; i <= 300; i++) {
-    let u = CreateUnit(p, DUMMY_ID, 0, 0, 0);
-    BlzPauseUnitEx(u, true);
-    GroupAddUnit(g, u);
-    UnitRemoveAbility(u, DUMMY_ABIL);
-  }
+	for (let i = 0; i <= 300; i++) {
+		let u = CreateUnit(p, DUMMY_ID, 0, 0, 0);
+		BlzPauseUnitEx(u, true);
+		GroupAddUnit(g, u);
+		UnitRemoveAbility(u, DUMMY_ABIL);
+	}
 };
 
 addScriptHook(W3TS_HOOK.INIT_BEFORE, onInit);
