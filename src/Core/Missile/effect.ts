@@ -84,4 +84,28 @@ export class MissileEffect {
       v.destroy();
     }
   }
+  setColor(red: number, green: number, blue: number) {
+    BlzSetSpecialEffectColor(this.effect, red, green, blue);
+    return this;
+  }
+
+  timeScale(v: number) {
+    BlzSetSpecialEffectTimeScale(this.effect, v);
+    return this;
+  }
+
+  alpha(v: number) {
+    BlzSetSpecialEffectAlpha(this.effect, v);
+    return this;
+  }
+
+  playerColor(v: number) {
+    BlzSetSpecialEffectColorByPlayer(this.effect, Player(v));
+    return this;
+  }
+
+  animation(v: number) {
+    BlzPlaySpecialEffect(this.effect, ConvertAnimType(v));
+    return this;
+  }
 }
