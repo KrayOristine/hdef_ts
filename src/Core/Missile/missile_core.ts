@@ -1,10 +1,9 @@
+import { Pool, DUMMY_ID, DUMMY_ABIL } from "pool";
+const REFRESH_RATE = 1 / 40;
+const SWEET_SPOT = 300;
+const UNIT_COLLISION = 128.0;
+const ITEM_COLLISION = 16.0;
 export class OzMissile {
-  private static readonly REFRESH_RATE = 1 / 40; // Update once every 40 frames
-  private static readonly SWEET_SPOT = 300; // Maximum amount of missile to process
-  private static readonly EXTRA_COLLISION = 128.0; // Number of additional collision added to checking
-  private static readonly ITEM_COLLISION = 16.0; // Number of item collision added to checking
-  private static readonly DUMMY_ID = FourCC("dumi");
-  private static readonly DUMMY_ABIL = FourCC("Amrf");
   public source: unit;
   public target: unit;
   public owner: player;

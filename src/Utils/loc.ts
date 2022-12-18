@@ -14,6 +14,13 @@ export function SetUnitZ(whichUnit: unit, newZ: number) {
   );
 }
 
+export function UnitGetZ(whichUnit: unit) {
+  return (
+    LocGetZ(GetUnitX(whichUnit), GetUnitY(whichUnit)) +
+    GetUnitFlyHeight(whichUnit)
+  );
+}
+
 export function FastCC(s: string): number {
   if (s.length > 4) return;
   if (!cacheCC[s]) {

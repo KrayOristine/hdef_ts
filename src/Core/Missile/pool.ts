@@ -32,12 +32,21 @@ export class Pool {
 
   static delay(u: unit, time: number) {
     if (GetUnitTypeId(u) != DUMMY_ID) return;
-    new Timer().start(time, false, () => {
+    let t = new Timer();
+    t.start(time, false, () => {
       Pool.recycle(u);
+      t.destroy();
     });
   }
 }
 
-const onInit = () => {};
+const onInit = () => {
+  for (let i = 0; i <= 300; i++) {
+    let u = CreateUnit(p, DUMMY_ID, 0, 0, 0);
+    BlzPauseUnitEx(u, true);
+    GroupAddUnit(g, u);
+    UnitRemoveAbility(u, DUMMY_ABIL);
+  }
+};
 
 addScriptHook(W3TS_HOOK.INIT_BEFORE, onInit);
