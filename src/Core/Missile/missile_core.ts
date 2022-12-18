@@ -13,7 +13,7 @@ var id = -1,
 	dilation = 1,
 	index = 1;
 var last: number, yaw: number, pitch: number, travelled: number;
-var arr = new WeakMap(),
+var arr: WeakMap<OzMissile, WeakMap<unit, boolean>> = new WeakMap(),
 	keys = [];
 var missile: OzMissile[] = [];
 var frozen: OzMissile[] = [];
@@ -61,18 +61,19 @@ export class OzMissile {
 	public damage: number;
 	public travel: number;
 	public type: number;
-	public model: string;
-	public duration: number;
-	public scale: number;
-	public speed: number;
-	public arc: number;
-	public curve: number;
-	public vision: number;
-	public timeScale: number;
-	public alpha: number;
-	public playerColor: number;
-	public animation: number;
 	// Begin private properties
+	private _model: string;
+	private _duration: number;
+	private _scale: number;
+	private _speed: number;
+	private _arc: number;
+	private _curve: number;
+	private _vision: number;
+	private _timeScale: number;
+	private _alpha: number;
+	private _playerColor: number;
+	private _animation: number;
+	private cA: number;
 	private launched: boolean;
 	private allocated: boolean;
 	private key: number;
@@ -132,17 +133,17 @@ export class OzMissile {
 		this.type = 0;
 		this.pkey = -1;
 		this.index = -1;
-		this.model = "";
-		this.duration = 0;
-		this.scale = 1;
-		this.speed = 0;
-		this.arc = 0;
-		this.curve = 0;
-		this.vision = 0;
-		this.timeScale = 0;
-		this.alpha = 0;
-		this.playerColor = 0;
-		this.animation = 0;
+		this._model = "";
+		this._duration = 0;
+		this._scale = 1;
+		this._speed = 0;
+		this._arc = 0;
+		this._curve = 0;
+		this._vision = 0;
+		this._timeScale = 0;
+		this._alpha = 0;
+		this._playerColor = 0;
+		this._animation = 0;
 	}
 
 	setup(x: number, y: number, z: number, toX: number, toY: number, toZ: number) {
@@ -162,7 +163,176 @@ export class OzMissile {
 		this.toZ = toZ;
 	}
 
-	static move() {}
+	remove(i: number) {
+		if (this.paused) this.onPause();
+		else this.onRemove();
+		missile[i] = missile[id];
+		id = id - 1;
+		dilation = id + 1 > SWEET_SPOT && SWEET_SPOT > 0 ? (id + 1) / SWEET_SPOT : 1.0;
+		if (id == -1) tmr.pause();
+		if (!this.allocated) {
+			keys.push(this.key);
+		}
+		return i - 1;
+	}
+
+	get model() {
+		return this._model;
+	}
+
+	set model(path: string) {
+		DestroyEffect(this.effect.effect);
+		this.effect.path = path;
+		this._model = path;
+		this.effect.effect = AddSpecialEffect(path, this.origin.x, this.origin.y);
+		BlzSetSpecialEffectZ(this.effect.effect, this.origin.z);
+		BlzSetSpecialEffectYaw(this.effect.effect, this.cA);
+	}
+
+	get curve() {
+		return this._curve;
+	}
+
+	set curve(v: number) {
+		this.open = Math.tan(v * bj_DEGTORAD) * this.origin.distance;
+		this._curve = v;
+	}
+
+	get arc() {
+		return this._arc;
+	}
+
+	set arc(v: number) {
+		this.height = (Math.tan(v * bj_DEGTORAD) * this.origin.distance) / 4;
+		this._arc = v;
+	}
+
+	get scale() {
+		return this._scale;
+	}
+
+	set scale(v: number) {
+		this.effect.size = v;
+		this.effect.scale(v);
+		this._curve = v;
+	}
+
+	get speed() {
+		return this._speed;
+	}
+
+	set speed(v: number) {
+		this.velocity = v * REFRESH_RATE;
+		this.speed = v;
+
+		let vel = this.velocity * dilation;
+		let s = this.travel + vel;
+		let d = this.origin.distance;
+
+		this.nextX = this.x + vel * Math.cos(this.cA);
+		this.nextY = this.y + vel * Math.sin(this.cA);
+		if (this.height != 0 || this.origin.slope != 0) {
+			this.nextZ = (4 * this.height * s * (d - s)) / (d * d) + this.origin.slope * s + this.origin.z;
+			this.z = this.nextZ;
+		}
+	}
+
+	get duration() {
+		return this._duration;
+	}
+
+	set duration(v: number) {
+		this.velocity = Math.max(0.00000001, ((this.origin.distance - this.travel) * REFRESH_RATE) / Math.max(0.00000001, v));
+		this.duration = v;
+
+		let vel = this.velocity * dilation;
+		let s = this.travel + vel;
+		let d = this.origin.distance;
+		this.nextX = this.x + vel * Math.cos(this.cA);
+		this.nextY = this.y + vel * Math.sin(this.cA);
+
+		if (this.height != 0 || this.origin.slope != 0) {
+			this.nextZ = (4 * this.height * s * (d - s)) / (d * d) + this.origin.slope * s + this.origin.z;
+			this.z = this.nextZ;
+		}
+	}
+
+	get vision() {
+		return this._vision;
+	}
+
+	set vision(v: number) {
+		this._vision = v;
+
+		if (this.dummy) {
+			SetUnitOwner(this.dummy, this.owner, false);
+			BlzSetUnitRealField(this.dummy, UNIT_RF_SIGHT_RADIUS, v);
+		} else {
+			if (!(this.owner && this.source)) {
+				this.dummy = Pool.retrieve(this.x, this.y, this.z, 0);
+				SetUnitOwner(this.dummy, GetOwningPlayer(this.source), false);
+				BlzSetUnitRealField(this.dummy, UNIT_RF_SIGHT_RADIUS, v);
+			} else {
+				this.dummy = Pool.retrieve(this.x, this.y, this.z, 0);
+				SetUnitOwner(this.dummy, this.owner, false);
+				BlzSetUnitRealField(this.dummy, UNIT_RF_SIGHT_RADIUS, v);
+			}
+		}
+	}
+
+	attachEffect(x: number, y: number, z: number, scale: number, model: string) {
+		return this.effect.attach(x, y, z, scale, model);
+	}
+
+	detachEffect(index: number) {
+		return this.effect.detach(index);
+	}
+	color(r: number, g: number, b: number) {
+		this.effect.setColor(r, g, b);
+		return this;
+	}
+
+	isHit(whichUnit: unit) {
+		return arr.get(this).has(whichUnit);
+	}
+
+	removeHit(whichUnit: unit) {
+		return arr.get(this).delete(whichUnit);
+	}
+
+	flush() {
+		return arr.delete(this);
+	}
+
+	pause(flag) {}
+
+	static move() {
+		let i = SWEET_SPOT > 0 ? last : 0;
+		let j = 0;
+		while (!(j >= SWEET_SPOT && SWEET_SPOT > 0) || j > id) {
+			let ms = missile[i];
+			if (ms.allocated && !ms.paused) {
+				ms.checkUnit();
+				ms.checkDestructable();
+				ms.checkItem();
+				ms.checkCliff();
+				ms.checkPeriod();
+				ms.onOrient();
+				ms.checkFinish();
+				ms.checkBounds();
+			} else {
+				i = ms.remove(i);
+				j = j - 1;
+			}
+
+			i = i + 1;
+			j = j + 1;
+			if (i > id && SWEET_SPOT > 0) {
+				i = 0;
+			}
+		}
+		last = i;
+	}
 
 	launch() {
 		if (this.launched && this.allocated) return;

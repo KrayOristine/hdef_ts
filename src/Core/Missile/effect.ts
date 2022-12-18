@@ -1,7 +1,6 @@
 import { WorldBounds } from "Utils/worldBounds";
 export class MissileEffect {
 	private arr: MissileEffect[];
-	private reverse: Map<effect, number>;
 	public effect: effect;
 	public x: number;
 	public y: number;
@@ -18,7 +17,6 @@ export class MissileEffect {
 		this.roll = 0;
 		this.size = 0;
 		this.arr = [];
-		this.reverse = new Map();
 		this.effect = AddSpecialEffect(this.path, x, y);
 		BlzSetSpecialEffectZ(this.effect, z);
 	}
@@ -68,15 +66,19 @@ export class MissileEffect {
 			BlzGetLocalSpecialEffectZ(e.effect) - z
 		);
 		let i = this.arr.push(e);
-		this.reverse.set(e.effect, i);
-		return e.effect;
+		return i;
 	}
-	detach(e: effect) {
-		if (this.reverse.has(e)) {
-			let v = table.remove(this.arr, this.reverse.get(e));
-			this.reverse.delete(e);
+
+	getAttachEffect(i: number) {
+		return this.arr[i].effect || null;
+	}
+	detach(i: number) {
+		if (this.arr[i]) {
+			let v = table.remove(this.arr, i);
 			v.destroy();
+			return true;
 		}
+		return false;
 	}
 	setColor(red: number, green: number, blue: number) {
 		BlzSetSpecialEffectColor(this.effect, red, green, blue);
