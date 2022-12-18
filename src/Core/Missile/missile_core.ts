@@ -1,5 +1,5 @@
 import { Pool, DUMMY_ID, DUMMY_ABIL } from "pool";
-import { Timer, Group } from "w3ts";
+import { Timer, Group, Unit, MapPlayer } from "w3ts";
 import { Coords } from "coords";
 import { MissileEffect } from "effect";
 const REFRESH_RATE = 1 / 40;
@@ -13,7 +13,7 @@ var id = -1,
 	dilation = 1,
 	index = 1;
 var last: number, yaw: number, pitch: number, travelled: number;
-var arr: WeakMap<OzMissile, WeakMap<unit, boolean>> = new WeakMap(),
+var arr: WeakMap<OzMissile, WeakMap<Unit, boolean>> = new WeakMap(),
 	keys = [];
 var missile: OzMissile[] = [];
 var frozen: OzMissile[] = [];
@@ -38,21 +38,21 @@ export class OzMissile {
 	public effect: MissileEffect;
 
 	// Configurable properties
-	public source: unit;
-	public target: unit;
-	public owner: player;
+	public source: Unit;
+	public target: Unit;
+	public owner: MapPlayer;
 	public collision: number;
-	public onHit: Function;
-	public onMissile: Function;
-	public onPeriod: Function;
-	public onItem: Function;
-	public onDestructable: Function;
-	public onCliff: Function;
-	public onBoundaries: Function;
-	public onFinish: Function;
-	public onPause: Function;
-	public onResume: Function;
-	public onRemove: Function;
+	public onHit: (targetUnit: Unit) => boolean;
+	public onMissile: (targetMissile: OzMissile) => boolean;
+	public onPeriod: () => boolean;
+	public onItem: (targetItem: item) => boolean;
+	public onDestructable: (targetDestructable: destructable) => boolean;
+	public onCliff: () => boolean;
+	public onBoundaries: () => boolean;
+	public onFinish: () => boolean;
+	public onPause: () => boolean;
+	public onResume: () => boolean;
+	public onRemove: () => boolean;
 	public paused: boolean;
 	public finished: boolean;
 	public roll: boolean;
@@ -77,7 +77,7 @@ export class OzMissile {
 	private launched: boolean;
 	private allocated: boolean;
 	private key: number;
-	private dummy: unit;
+	private dummy: Unit;
 	private open: number;
 	private height: number;
 	private velocity: number;
@@ -85,10 +85,10 @@ export class OzMissile {
 	private turn: number;
 	private index: number;
 	private pkey: number;
-	constructor(source: unit, target: unit) {
+	constructor(source: Unit, target: Unit) {
 		this.source = source;
 		this.target = target;
-		this.owner = GetOwningPlayer(source);
+		this.owner = source.owner;
 		arr.set(this, new WeakMap());
 		if (keys.length > 0) {
 			this.key = keys[keys.length];
@@ -164,8 +164,14 @@ export class OzMissile {
 	}
 
 	remove(i: number) {
-		if (this.paused) this.onPause();
-		else this.onRemove();
+		if (this.paused) {
+			pid++;
+			this.pkey = pid;
+			frozen[pid] = this;
+			if (this.onPause && this.allocated && this.onPause()) this.terminate();
+		} else {
+			this.terminate();
+		}
 		missile[i] = missile[id];
 		id = id - 1;
 		dilation = id + 1 > SWEET_SPOT && SWEET_SPOT > 0 ? (id + 1) / SWEET_SPOT : 1.0;
@@ -264,20 +270,47 @@ export class OzMissile {
 	set vision(v: number) {
 		this._vision = v;
 
-		if (this.dummy) {
-			SetUnitOwner(this.dummy, this.owner, false);
-			BlzSetUnitRealField(this.dummy, UNIT_RF_SIGHT_RADIUS, v);
-		} else {
-			if (!(this.owner && this.source)) {
-				this.dummy = Pool.retrieve(this.x, this.y, this.z, 0);
-				SetUnitOwner(this.dummy, GetOwningPlayer(this.source), false);
-				BlzSetUnitRealField(this.dummy, UNIT_RF_SIGHT_RADIUS, v);
-			} else {
-				this.dummy = Pool.retrieve(this.x, this.y, this.z, 0);
-				SetUnitOwner(this.dummy, this.owner, false);
-				BlzSetUnitRealField(this.dummy, UNIT_RF_SIGHT_RADIUS, v);
-			}
+		if (this.dummy) this.dummy.setOwner(this.owner, false);
+		else {
+			this.dummy = Pool.retrieve(this.x, this.y, this.z, 0);
+			if (!this.owner && this.source) this.dummy.setOwner(this.source.owner, false);
+			else this.dummy.setOwner(this.owner, false);
 		}
+		this.dummy.setField(UNIT_RF_SIGHT_RADIUS, v);
+	}
+	get timeScale() {
+		return this._timeScale;
+	}
+	set timeScale(value: number) {
+		this._timeScale = value;
+		this.effect.timeScale(value);
+	}
+
+	get alpha() {
+		return this._alpha;
+	}
+
+	set alpha(value: number) {
+		this._alpha = value;
+		this.effect.alpha(value);
+	}
+
+	get playerColor() {
+		return this._playerColor;
+	}
+
+	set playerColor(value: number) {
+		this._playerColor = value;
+		this.effect.playerColor(value);
+	}
+
+	get animation() {
+		return this._animation;
+	}
+
+	set animation(value: number) {
+		this._animation = value;
+		this.effect.animation(value);
 	}
 
 	attachEffect(x: number, y: number, z: number, scale: number, model: string) {
@@ -292,11 +325,11 @@ export class OzMissile {
 		return this;
 	}
 
-	isHit(whichUnit: unit) {
+	isHit(whichUnit: Unit) {
 		return arr.get(this).has(whichUnit);
 	}
 
-	removeHit(whichUnit: unit) {
+	removeHit(whichUnit: Unit) {
 		return arr.get(this).delete(whichUnit);
 	}
 
@@ -304,7 +337,65 @@ export class OzMissile {
 		return arr.delete(this);
 	}
 
-	pause(flag) {}
+	private checkUnit() {
+		if (!this.onHit) return;
+		if (!this.allocated && this.collision <= 0) return;
+		g.enumUnitsInRange(this.x, this.y, this.collision + UNIT_COLLISION, () => true);
+		if (g.size == 0) return;
+		while (true) {
+			let u = g.getUnitAt(0);
+		}
+	}
+
+	pause(flag: boolean) {
+		this.paused = flag;
+		if (!this.paused && this.pkey != -1) {
+			id++;
+			missile[id] = this;
+			let rs = frozen[pid];
+			rs.pkey = this.pkey;
+			frozen[this.pkey] = frozen[pid];
+			pid--;
+			this.pkey = -1;
+
+			dilation = id + 1 > SWEET_SPOT && SWEET_SPOT > 0 ? (id + 1) / SWEET_SPOT : 1.0;
+			if (id == 0) {
+				tmr.start(REFRESH_RATE, true, updateMove);
+			}
+			if ((this.onResume && this.allocated && this.onResume()) || this.finished) {
+				this.terminate();
+			}
+		}
+	}
+
+	terminate() {
+		if (!this.allocated && !this.launched) return;
+		this.allocated = false;
+		let ms: OzMissile;
+
+		if (this.pkey != -1) {
+			ms = frozen[pid];
+			ms.pkey = this.pkey;
+			frozen[this.pkey] = frozen[pid];
+			pid = pid - 1;
+			this.pkey = -1;
+		}
+
+		if (this.onRemove) this.onRemove();
+		if (this.dummy) Pool.recycle(this.dummy);
+
+		ms = list[count];
+		ms.index = this.index;
+		list[this.index] = list[count];
+		count--;
+		this.index = -1;
+
+		this.origin = null;
+		this.impact = null;
+		this.effect.destroy();
+		this.reset();
+		arr.delete(this);
+	}
 
 	static move() {
 		let i = SWEET_SPOT > 0 ? last : 0;
@@ -313,6 +404,7 @@ export class OzMissile {
 			let ms = missile[i];
 			if (ms.allocated && !ms.paused) {
 				ms.checkUnit();
+				ms.checkMissile();
 				ms.checkDestructable();
 				ms.checkItem();
 				ms.checkCliff();

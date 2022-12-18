@@ -1,37 +1,35 @@
 import { SetUnitZ } from "Utils/loc";
-import { Timer } from "w3ts";
-import { addScriptHook, W3TS_HOOK } from "w3ts";
-const g = CreateGroup();
-const p = Player(PLAYER_NEUTRAL_PASSIVE);
+import { addScriptHook, W3TS_HOOK, Unit, Timer, Group } from "w3ts";
+const g = new Group();
 export const DUMMY_ID = FourCC("dumi");
 export const DUMMY_ABIL = FourCC("Amrf");
 export class Pool {
-	static recycle(u: unit) {
-		if (GetUnitTypeId(u) != DUMMY_ID) return;
-		GroupAddUnit(g, u);
-		SetUnitX(u, 0);
-		SetUnitY(u, 0);
-		BlzPauseUnitEx(u, true);
+	static recycle(u: Unit) {
+		if (u.typeId != DUMMY_ID) return;
+		g.addUnit(u);
+		u.x = 0;
+		u.y = 0;
+		u.pauseEx(true);
 	}
 
 	static retrieve(x: number, y: number, z: number, face: number) {
-		if (BlzGroupGetSize(g) == 0) {
-			let u = CreateUnit(p, DUMMY_ID, x, y, face);
+		if (g.size == 0) {
+			let u = new Unit(PLAYER_NEUTRAL_PASSIVE, DUMMY_ID, x, y, face);
 			SetUnitZ(u, z);
-			UnitRemoveAbility(u, DUMMY_ABIL);
+			u.removeAbility(DUMMY_ABIL);
 			return u;
 		}
-		let u = BlzGroupUnitAt(g, 0);
-		GroupRemoveUnit(g, u);
-		SetUnitX(u, x);
-		SetUnitY(u, y);
+		let u = g.getUnitAt(0);
+		g.removeUnit(u);
+		u.x = x;
+		u.y = y;
 		SetUnitZ(u, z);
-		BlzSetUnitFacingEx(u, face);
+		u.setFacingEx(face);
 		return u;
 	}
 
-	static delay(u: unit, time: number) {
-		if (GetUnitTypeId(u) != DUMMY_ID) return;
+	static delay(u: Unit, time: number) {
+		if (u.typeId != DUMMY_ID) return;
 		let t = new Timer();
 		t.start(time, false, () => {
 			Pool.recycle(u);
@@ -42,10 +40,10 @@ export class Pool {
 
 const onInit = () => {
 	for (let i = 0; i <= 300; i++) {
-		let u = CreateUnit(p, DUMMY_ID, 0, 0, 0);
-		BlzPauseUnitEx(u, true);
-		GroupAddUnit(g, u);
-		UnitRemoveAbility(u, DUMMY_ABIL);
+		let u = new Unit(PLAYER_NEUTRAL_PASSIVE, DUMMY_ID, 0, 0, 0);
+		u.pauseEx(true);
+		g.addUnit(u);
+		u.removeAbility(DUMMY_ABIL);
 	}
 };
 
