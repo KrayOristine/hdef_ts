@@ -1,3 +1,4 @@
+import { WorldBounds } from "Utils/worldBounds";
 const reverseMap = new Map();
 export class MissileEffect {
   private arr: MissileEffect[];
@@ -44,4 +45,22 @@ export class MissileEffect {
     }
     return this;
   }
+
+  move(x: number, y: number, z: number) {
+    if (
+      x > WorldBounds.maxX ||
+      x < WorldBounds.minY ||
+      y > WorldBounds.maxX ||
+      y < WorldBounds.minY
+    )
+      return false;
+
+    BlzSetSpecialEffectPosition(this.effect, x, y, z);
+    this.arr.forEach((eff) => {
+      BlzSetSpecialEffectPosition(eff.effect, x - eff.x, y - eff.y, z - eff.z);
+    });
+    return true;
+  }
+
+  attach(x: number, y: number, z: number, scale: number, model?: string) {}
 }
