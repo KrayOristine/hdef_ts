@@ -23,14 +23,17 @@ export class OzMissile {
   public owner: player;
   public prevX: number;
   public prevY: number;
+  public prevZ: number;
   public x: number;
   public y: number;
+  public z: number;
   public nextX: number;
   public nextY: number;
+  public nextZ: number;
   public origin: Coords;
   public impact: Coords;
 
-  __constructor(source: unit, target: unit) {
+  constructor(source: unit, target: unit) {
     this.source = source;
     this.target = target;
     this.owner = GetOwningPlayer(source);

@@ -9,7 +9,7 @@ export class Coords {
   public angle: number;
   public slope: number;
   public alpha: number;
-  __constructor(x: number, y: number, z: number) {
+  constructor(x: number, y: number, z: number) {
     this.ref = this;
     this.move(x, y, z);
   }

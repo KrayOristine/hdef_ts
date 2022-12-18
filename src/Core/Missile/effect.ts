@@ -1,7 +1,7 @@
 import { WorldBounds } from "Utils/worldBounds";
-const reverseMap = new Map();
 export class MissileEffect {
   private arr: MissileEffect[];
+  private reverse: Map<effect, number>;
   public effect: effect;
   public x: number;
   public y: number;
@@ -11,13 +11,14 @@ export class MissileEffect {
   public roll: number;
   public path: string;
   public size: number;
-  __constructor(x: number, y: number, z: number, modelPath?: string) {
+  constructor(x: number, y: number, z: number, modelPath?: string) {
     this.path = modelPath || "";
     this.yaw = 0;
     this.pitch = 0;
     this.roll = 0;
     this.size = 0;
     this.arr = [];
+    this.reverse = new Map();
     this.effect = AddSpecialEffect(this.path, x, y);
     BlzSetSpecialEffectZ(this.effect, z);
   }
@@ -30,6 +31,7 @@ export class MissileEffect {
   scale(v: number) {
     this.size = v;
     BlzSetSpecialEffectScale(this.effect, v);
+    return this;
   }
 
   orient(yaw: number, pitch: number, roll: number) {
@@ -62,5 +64,24 @@ export class MissileEffect {
     return true;
   }
 
-  attach(x: number, y: number, z: number, scale: number, model?: string) {}
+  attach(x: number, y: number, z: number, scale?: number, model?: string) {
+    let e = new MissileEffect(x, y, z, model || "");
+    if (scale) e.scale(scale);
+    BlzSetSpecialEffectPosition(
+      e.effect,
+      BlzGetLocalSpecialEffectX(e.effect) - x,
+      BlzGetLocalSpecialEffectY(e.effect) - y,
+      BlzGetLocalSpecialEffectZ(e.effect) - z
+    );
+    let i = this.arr.push(e);
+    this.reverse.set(e.effect, i);
+    return e.effect;
+  }
+  detach(e: effect) {
+    if (this.reverse.has(e)) {
+      let v = table.remove(this.arr, this.reverse.get(e));
+      this.reverse.delete(e);
+      v.destroy();
+    }
+  }
 }
