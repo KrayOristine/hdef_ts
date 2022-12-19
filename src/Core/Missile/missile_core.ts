@@ -3,6 +3,7 @@ import { Timer, Group, Unit, MapPlayer, Destructable, Item, Rectangle } from "w3
 import { Coords } from "coords";
 import { MissileEffect } from "effect";
 import { LocGetZ } from "Utils/loc";
+import { WorldBounds } from "Utils/worldBounds";
 const REFRESH_RATE = 1 / 40;
 const SWEET_SPOT = 300;
 const UNIT_COLLISION = 128.0;
@@ -21,6 +22,7 @@ var missile: OzMissile[] = [];
 var frozen: OzMissile[] = [];
 var count = 0;
 var list: OzMissile[] = [];
+const mapCliff = GetTerrainCliffLevel(WorldBounds.maxX, WorldBounds.maxY);
 export class OzMissile {
 	public prevX: number;
 	public prevY: number;
@@ -408,6 +410,101 @@ export class OzMissile {
 			arr.get(this).set(i, true);
 			if (this.allocated && this.onItem(i)) this.terminate();
 		});
+	}
+
+	private checkCliff() {
+		if (!this.onCliff) return;
+		if (!this.allocated && this.collision <= 0) return;
+		let nxc = GetTerrainCliffLevel(this.nextX, this.nextY);
+		let nwc = GetTerrainCliffLevel(this.x, this.y);
+		if (nwc > nxc && this.z > (nxc - mapCliff) * bj_CLIFFHEIGHT) return;
+		if (this.allocated && this.onCliff()) this.terminate();
+	}
+
+	private checkPeriod() {
+		if (!this.onPeriod || !this.allocated) return;
+		if (this.onPeriod()) this.terminate();
+	}
+
+	private onOrient() {
+		let a: number;
+
+		// Homing or not
+		if (this.target && this.target.typeId != 0) {
+			this.impact.move(this.target.x, this.target.y, this.target.getflyHeight() + this.toZ);
+			let dx = this.impact.x - this.nextX;
+			let dy = this.impact.y - this.nextY;
+			a = Math.atan2(dy, dx);
+			this.travel = this.origin.distance - Math.sqrt(dx * dx + dy * dy);
+		} else {
+			a = this.origin.angle;
+			this.target = null;
+		}
+
+		// turn rate
+		if (this.turn != 0 && !(Math.cos(this.cA - a) >= Math.cos(this.turn))) {
+			if (Math.sin(a - this.cA) >= 0) this.cA = this.cA + this.turn;
+			else this.cA = this.cA - this.turn;
+		} else this.cA = a;
+
+		let vel = this.velocity * dilation;
+		yaw = this.cA;
+		travelled = this.travel + vel;
+		this.velocity = this.velocity + this.acceleration;
+		this.travel = travelled;
+		pitch = this.origin.alpha;
+		this.prevX = this.x;
+		this.prevY = this.y;
+		this.prevZ = this.z;
+		this.x = this.nextX;
+		this.y = this.nextY;
+		this.z = this.nextZ;
+		this.nextX = this.x + vel * Math.cos(yaw);
+		this.nextY = this.y + vel * Math.sin(yaw);
+
+		// arc calculation
+		let s = travelled;
+		let d = this.origin.distance;
+		let h = this.height;
+		if (h != 0 || this.origin.slope != 0) {
+			this.nextZ = (4 * h * s * (d - s)) / (d * d) + this.origin.slope * s + this.origin.z;
+			pitch = pitch - Math.atan((4 * h * (2 * s - d)) / (d * d));
+		}
+
+		//-- curve calculation
+		let c = this.open;
+		if (c != 0) {
+			let dx = (4 * c * s * (d - s)) / (d * d);
+			a = yaw + bj_PI / 2;
+			this.x = this.x + dx * Math.cos(a);
+			this.y = this.y + dx * Math.sin(a);
+			yaw = yaw + Math.atan(-(4 * c * (2 * s - d)) / (d * d));
+		}
+	}
+
+	private checkFinish() {
+		if (travelled >= this.origin.distance - 0.0001) {
+			this.finished = true;
+			if (!this.onFinish) return this.terminate();
+
+			if (this.allocated && this.onFinish()) return this.terminate();
+
+			if (this.travel > 0 && !this.paused) return this.terminate();
+			return;
+		}
+
+		if (!this.roll) this.effect.orient(yaw, -pitch, 0);
+		else this.effect.orient(yaw, -pitch, Math.atan2(this.open, this.height));
+	}
+
+	private checkBounds() {
+		if (this.effect.move(this.x, this.y, this.z) && this.dummy) {
+			this.dummy.x = this.x;
+			this.dummy.y = this.y;
+			return;
+		}
+
+		if (this.onBoundaries && this.allocated && this.onBoundaries()) this.terminate();
 	}
 
 	pause(flag: boolean) {
