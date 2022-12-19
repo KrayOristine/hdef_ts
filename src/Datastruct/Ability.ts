@@ -3,13 +3,12 @@ import { Handle, Item, Unit } from "w3ts";
 export class Ability extends Handle<ability> {
 	public readonly handle!: ability;
 	private _id: number;
+	public owner: Unit;
 
-	private constructor(ability: ability) {
-		if (Handle.initFromHandle()) {
-			super();
-		} else {
-			super(ability);
-		}
+	constructor(ability: ability, id: number) {
+		if (Handle.initFromHandle()) super();
+		else super(ability);
+		if (id != 0 && id != null) this._id = id;
 	}
 
 	public setField(
@@ -84,10 +83,9 @@ export class Ability extends Handle<ability> {
 		return this._id;
 	}
 
-	private set id(value: number) {
+	public set id(value: number) {
 		this._id = value;
 	}
-
 	public static fromEvent() {
 		let h = this.fromHandle(GetSpellAbility());
 		h._id = GetSpellAbilityId();
