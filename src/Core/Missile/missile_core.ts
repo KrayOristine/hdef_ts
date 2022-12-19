@@ -1,11 +1,13 @@
 import { Pool, DUMMY_ID, DUMMY_ABIL } from "pool";
-import { Timer, Group, Unit, MapPlayer } from "w3ts";
+import { Timer, Group, Unit, MapPlayer, Destructable, Item, Rectangle } from "w3ts";
 import { Coords } from "coords";
 import { MissileEffect } from "effect";
+import { LocGetZ } from "Utils/loc";
 const REFRESH_RATE = 1 / 40;
 const SWEET_SPOT = 300;
 const UNIT_COLLISION = 128.0;
 const ITEM_COLLISION = 16.0;
+const r = new Rectangle(0, 0, 0, 0);
 const tmr = new Timer();
 const g = new Group();
 var id = -1,
@@ -13,13 +15,12 @@ var id = -1,
 	dilation = 1,
 	index = 1;
 var last: number, yaw: number, pitch: number, travelled: number;
-var arr: WeakMap<OzMissile, WeakMap<Unit, boolean>> = new WeakMap(),
+var arr: WeakMap<OzMissile, WeakMap<Unit | OzMissile | Destructable | Item, boolean>> = new WeakMap(),
 	keys = [];
 var missile: OzMissile[] = [];
 var frozen: OzMissile[] = [];
 var count = 0;
 var list: OzMissile[] = [];
-const updateMove = () => OzMissile.move();
 export class OzMissile {
 	public prevX: number;
 	public prevY: number;
@@ -45,8 +46,8 @@ export class OzMissile {
 	public onHit: (targetUnit: Unit) => boolean;
 	public onMissile: (targetMissile: OzMissile) => boolean;
 	public onPeriod: () => boolean;
-	public onItem: (targetItem: item) => boolean;
-	public onDestructable: (targetDestructable: destructable) => boolean;
+	public onItem: (targetItem: Item) => boolean;
+	public onDestructable: (targetDestructable: Destructable) => boolean;
 	public onCliff: () => boolean;
 	public onBoundaries: () => boolean;
 	public onFinish: () => boolean;
@@ -344,7 +345,69 @@ export class OzMissile {
 		if (g.size == 0) return;
 		while (true) {
 			let u = g.getUnitAt(0);
+			if (u === null && g.size == 0) return;
+			g.removeUnit(u);
+			if (arr.get(this).has(u) && !u.inRange(this.x, this.y, this.collision)) continue;
+			if (this.useZ) {
+				let z = u.z;
+				let c = u.collisionSize;
+				if (z + c < this.z - this.collision && z + c > this.z + this.collision) continue;
+			}
+			arr.get(this).set(u, true);
+			if (this.allocated && this.onHit(u)) this.terminate();
 		}
+	}
+
+	private checkMissile() {
+		if (!this.onMissile) return;
+		if (!this.allocated && this.collision <= 0) return;
+		for (let i = 0; i < count; i++) {
+			let ms = list[i];
+			if (ms == this || arr.get(this).has(ms)) continue;
+			let dx = ms.x - this.x;
+			let dy = ms.y - this.y;
+			if (Math.sqrt(dx * dx + dy * dy) > this.collision) continue;
+			arr.get(this).set(ms, true);
+			if (this.allocated && this.onMissile(ms)) {
+				this.terminate();
+				return;
+			}
+		}
+	}
+
+	private checkDestructable() {
+		if (!this.onDestructable) return;
+		if (!this.allocated && this.collision <= 0) return;
+		let col = this.collision;
+		r.setRect(this.x - col, this.y - col, this.x + col, this.y + col);
+		r.enumDestructables(null, () => {
+			let d = Destructable.fromHandle(GetEnumDestructable());
+			if (arr.get(this).has(d)) return;
+			if (this.useZ) {
+				let z = LocGetZ(GetWidgetX(d.handle), GetWidgetY(d.handle));
+				let dc = d.occluderHeight;
+				if (z + dc < this.z - this.collision && z + dc > this.z + this.collision) return;
+			}
+			arr.get(this).set(d, true);
+			if (this.allocated && this.onDestructable(d)) this.terminate();
+		});
+	}
+
+	private checkItem() {
+		if (!this.onItem) return;
+		if (!this.allocated && this.collision <= 0) return;
+		let col = this.collision;
+		r.setRect(this.x - col, this.y - col, this.x + col, this.y + col);
+		r.enumItems(null, () => {
+			let i = Item.fromHandle(GetEnumItem());
+			if (arr.get(this).has(i)) return;
+			if (this.useZ) {
+				let z = LocGetZ(GetWidgetX(i.handle), GetWidgetY(i.handle));
+				if (z < this.z - this.collision && z > this.z + this.collision) return;
+			}
+			arr.get(this).set(i, true);
+			if (this.allocated && this.onItem(i)) this.terminate();
+		});
 	}
 
 	pause(flag: boolean) {
@@ -360,7 +423,7 @@ export class OzMissile {
 
 			dilation = id + 1 > SWEET_SPOT && SWEET_SPOT > 0 ? (id + 1) / SWEET_SPOT : 1.0;
 			if (id == 0) {
-				tmr.start(REFRESH_RATE, true, updateMove);
+				tmr.start(REFRESH_RATE, true, OzMissile.move);
 			}
 			if ((this.onResume && this.allocated && this.onResume()) || this.finished) {
 				this.terminate();
@@ -397,7 +460,7 @@ export class OzMissile {
 		arr.delete(this);
 	}
 
-	static move() {
+	private static move() {
 		let i = SWEET_SPOT > 0 ? last : 0;
 		let j = 0;
 		while (!(j >= SWEET_SPOT && SWEET_SPOT > 0) || j > id) {
@@ -438,7 +501,7 @@ export class OzMissile {
 		dilation = id + 1 > SWEET_SPOT && SWEET_SPOT > 0 ? (id + 1) / SWEET_SPOT : 1.0;
 
 		if (id == 0) {
-			tmr.start(REFRESH_RATE, true, updateMove);
+			tmr.start(REFRESH_RATE, true, OzMissile.move);
 		}
 	}
 }

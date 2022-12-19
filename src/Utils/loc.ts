@@ -1,6 +1,6 @@
-import { Unit } from "w3ts";
-const zeroLoc = Location(0, 0);
-const zeroRect = Rect(0, 0, 0, 0);
+import { Unit, Rectangle } from "w3ts";
+export const zeroLoc = Location(0, 0);
+export const zeroRect = new Rectangle(0, 0, 0, 0);
 var cacheCC = {};
 export function LocGetZ(atX: number, atY: number) {
 	MoveLocation(zeroLoc, atX, atY);

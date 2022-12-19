@@ -33,7 +33,7 @@ export class Coords {
 			dx = b.x - this.x;
 			dy = b.y - this.y;
 			dx = dx * dx + dy * dy;
-			dy = SquareRoot(dx);
+			dy = Math.sqrt(dx);
 			if (dx != 0 && dy != 0) {
 				break;
 			}
@@ -42,9 +42,9 @@ export class Coords {
 		}
 		this.square = dx;
 		this.distance = dy;
-		this.angle = Atan2(b.y - this.y, b.x - this.x);
+		this.angle = Math.atan2(b.y - this.y, b.x - this.x);
 		this.slope = (b.z - this.z) / dy;
-		this.alpha = Atan(this.slope);
+		this.alpha = Math.atan(this.slope);
 		if (b.ref == this) {
 			b.angle = this.angle + bj_PI;
 			b.distance = dy;
