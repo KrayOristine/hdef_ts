@@ -1,4 +1,4 @@
-export default class Checksum {
+export class Checksum {
 	private static toNum(data: string) {
 		let a = 0,
 			b = 0,
