@@ -39,21 +39,21 @@ function _onCast() {
 		bar.setLifespan(castTime + 0.5);
 		bar.setFadepoint(castTime + 0.25);
 		bar.setPos(caster.x, caster.y, 110);
-		bar.setText(render(0), 0.015);
+		bar.setText(render(0), 0.03);
 	}
 	let t = new Timer();
 	let t2 = new Timer();
 	t.start(0.03125, true, () => {
 		if (!bar) return;
 		if (cc[owner.id] == true || castTime < 0) {
-			bar.setText(string.format("|c00ff0000[|r%s|c00ff0000]|r", cc[owner.id] ? "CANCELLED" : "CASTED"), 0.01);
+			bar.setText(string.format("|c00ff0000[|r%s|c00ff0000]|r", cc[owner.id] ? "CANCELLED" : "CASTED"), 0.03);
 			t.pause();
 			t.destroy();
 			return;
 		}
 		now += rate;
 		castTime -= 0.03125;
-		bar.setText(render(now), 0.015);
+		bar.setText(render(now), 0.03);
 	});
 	t2.start(castTime + 0.15, false, () => {
 		if (!bar) return;
