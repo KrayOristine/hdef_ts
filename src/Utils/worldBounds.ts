@@ -9,7 +9,9 @@ class Bounds {
 	public centerX: number;
 	public centerY: number;
 
-	constructor() {}
+	constructor() {
+		// Unable to initialize the basic rect because of export limitation
+	}
 
 	initRect(r?: rect) {
 		if (!this.rect && r) this.rect = r;
@@ -32,7 +34,7 @@ class Bounds {
 	}
 
 	randomLoc() {
-		return this.randomX(), this.randomY();
+		return { x: this.randomX(), y: this.randomY() };
 	}
 
 	getBoundedX(v: number, margin?: number) {
@@ -50,7 +52,7 @@ class Bounds {
 	}
 
 	getBoundedXY(x: number, y: number, margin?: number) {
-		return this.getBoundedX(x, margin), this.getBoundedY(y, margin);
+		return { x: this.getBoundedX(x, margin), y: this.getBoundedY(y, margin) };
 	}
 
 	containsX(x: number) {
