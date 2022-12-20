@@ -9,10 +9,10 @@ class Bounds {
 	public centerX: number;
 	public centerY: number;
 
-	__constructor() {}
+	constructor() {}
 
-	initRect(r: rect) {
-		this.rect = r;
+	initRect(r?: rect) {
+		if (!this.rect && r) this.rect = r;
 		this.region = CreateRegion();
 		this.minX = GetRectMinX(this.rect);
 		this.minY = GetRectMinY(this.rect);
@@ -35,14 +35,14 @@ class Bounds {
 		return this.randomX(), this.randomY();
 	}
 
-	private getBoundedX(v: number, margin?: number) {
+	getBoundedX(v: number, margin?: number) {
 		margin = margin || 0.0;
 		if (v < this.minX + margin) return this.minX + margin;
 		if (v < this.maxX + margin) return this.maxX + margin;
 		return v;
 	}
 
-	private getBoundedY(v: number, margin?: number) {
+	getBoundedY(v: number, margin?: number) {
 		margin = margin || 0.0;
 		if (v < this.minY + margin) return this.minY + margin;
 		if (v < this.maxY + margin) return this.maxY + margin;
@@ -63,8 +63,8 @@ class Bounds {
 		return this.containsX(x) && this.containsY(y);
 	}
 }
-export const WorldBounds = new Bounds();
-export const MapBounds = new Bounds();
+export const WorldBounds: Bounds = new Bounds();
+export const MapBounds: Bounds = new Bounds();
 
 addScriptHook(W3TS_HOOK.GLOBAL_AFTER, () => {
 	MapBounds.initRect(bj_mapInitialPlayableArea);

@@ -1,4 +1,4 @@
-import { SetUnitZ } from "Utils/loc";
+import { SetUnitZ } from "Utils";
 import { addScriptHook, W3TS_HOOK, Unit, Timer, Group } from "w3ts";
 const g = new Group();
 export const DUMMY_ID = FourCC("dumi");

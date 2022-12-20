@@ -1,5 +1,5 @@
-import { Ability } from "Datastruct/Ability";
-import { LocGetZ, UnitGetZ } from "Utils/loc";
+import { Ability } from "Datastruct";
+import { LocGetZ, UnitGetZ } from "Utils";
 import { Trigger, MapPlayer, Unit, addScriptHook, W3TS_HOOK } from "w3ts";
 
 //cspell: ignore gtrg,gfun

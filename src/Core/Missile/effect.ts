@@ -1,4 +1,4 @@
-import { WorldBounds } from "Utils/worldBounds";
+import { WorldBounds } from "Utils";
 export class MissileEffect {
 	private arr: MissileEffect[];
 	public effect: effect;

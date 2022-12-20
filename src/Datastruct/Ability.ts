@@ -2,13 +2,15 @@ import { Handle, Item, Unit } from "w3ts";
 
 export class Ability extends Handle<ability> {
 	public readonly handle!: ability;
-	private _id: number;
-	public owner: Unit;
-
+	private readonly _id: number;
 	constructor(ability: ability, id: number) {
 		if (Handle.initFromHandle()) super();
 		else super(ability);
-		if (id != 0 && id != null) this._id = id;
+		if (id != 0) this._id = id;
+	}
+
+	public get id(): number {
+		return this._id;
 	}
 
 	public setField(
@@ -79,23 +81,12 @@ export class Ability extends Handle<ability> {
 		}
 	}
 
-	public get id(): number {
-		return this._id;
-	}
-
-	public set id(value: number) {
-		this._id = value;
-	}
 	public static fromEvent() {
-		let h = this.fromHandle(GetSpellAbility());
-		h._id = GetSpellAbilityId();
-		return h;
+		return this.fromHandle(GetSpellAbility());
 	}
 
 	public static fromItem(item: Item, id: number) {
-		let h = this.fromHandle(BlzGetItemAbility(item.handle, id));
-		h.id = id;
-		return h;
+		return this.fromHandle(BlzGetItemAbility(item.handle, id));
 	}
 
 	public static fromItemIndex(item: Item, index: number) {
@@ -103,9 +94,7 @@ export class Ability extends Handle<ability> {
 	}
 
 	public static fromUnit(unit: Unit, id: number) {
-		let h = this.fromHandle(BlzGetUnitAbility(unit.handle, id));
-		h.id = id;
-		return h;
+		return this.fromHandle(BlzGetUnitAbility(unit.handle, id));
 	}
 
 	public static fromUnitIndex(unit: Unit, index: number) {

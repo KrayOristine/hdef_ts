@@ -1,4 +1,4 @@
-import { LocGetZ } from "Utils/loc";
+import { LocGetZ } from "Utils";
 export class Coords {
 	private ref: Coords;
 	public x: number;
