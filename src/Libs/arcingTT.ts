@@ -48,7 +48,6 @@ export class ArcTT {
 			if (!tt) return;
 			if (pass >= t) {
 				this.tmr.pause();
-				tt.destroy();
 				return;
 			}
 			let point = Math.sin(bj_PI * ((t - pass) / timeScale));
