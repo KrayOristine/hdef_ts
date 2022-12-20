@@ -404,7 +404,7 @@ export class OzMissile {
 			if (arr.get(this).has(i)) return;
 			if (this.useZ) {
 				let z = LocGetZ(GetWidgetX(i.handle), GetWidgetY(i.handle));
-				if (z < this.z - this.collision && z > this.z + this.collision) return;
+				if (z + ITEM_COLLISION < this.z - this.collision && z + ITEM_COLLISION > this.z + this.collision) return;
 			}
 			arr.get(this).set(i, true);
 			if (this.allocated && this.onItem(i)) this.terminate();
