@@ -1,8 +1,8 @@
 import { MapPlayer } from "w3ts";
-import ck from "codeChecksum";
+import { Checksum } from "codeChecksum";
 
 function verify(name: string, buffer: string) {
-	let s = ck.serial(name + tostring(0x1000) + buffer).toLowerCase();
+	let s = Checksum.serial(name + tostring(0x1000) + buffer).toLowerCase();
 	const alpha = "abcdefghijklmnopqrstuvwxyz";
 	const ichar = "0123456789-_-_-_-_-_-_-_-_";
 

@@ -2,15 +2,13 @@ import { Handle, Item, Unit } from "w3ts";
 
 export class Ability extends Handle<ability> {
 	public readonly handle!: ability;
-	private readonly _id: number;
-	constructor(ability: ability, id: number) {
+	constructor(ability: ability) {
 		if (Handle.initFromHandle()) super();
 		else super(ability);
-		if (id != 0) this._id = id;
 	}
 
-	public get id(): number {
-		return this._id;
+	public get typeId(): number {
+		return BlzGetAbilityId(this.handle);
 	}
 
 	public setField(
