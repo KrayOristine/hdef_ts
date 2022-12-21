@@ -113,4 +113,5 @@ export function decode(code: string, player: MapPlayer, charList: string, listLe
 	}
 	f = verify(player.name, buffer.substring(0, k));
 	if (f == result[n]) return result;
+	else return [];
 }

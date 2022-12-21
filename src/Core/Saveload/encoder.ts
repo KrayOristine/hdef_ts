@@ -9,7 +9,8 @@ import { Logger } from "wc3-treelib";
 const _forward: number[][] = [];
 const saveIndex: number[] = [0, 0, 0];
 const _reverse: number[][] = [];
-const stackMaxIndex = 70; // Maximum stack size
+const stackMaxIndex = 70; // Maximum stack size this is a recommended size for mostly everything
+// The largest possible i got is 90 but be careful as it may exceed string length for sync system
 
 // These are pre-generated random string list for usage for the best security
 // 	"l^OikK>)NJFL=]'IvfQZ-E+M0URBqHm~|*r<y!`zAt4S[(P?/ghV2$C,oT&Ww#cD7_5}{6x@31nujaGb9sXY.pde8", //-- 1
@@ -42,6 +43,15 @@ export class SaveEncoder {
 		this._index = 0;
 		this._recursion = 0;
 		this.addInt(Checksum.sum(whichPlayer.name));
+	}
+
+	reset() {
+		this._code = [];
+		this._index = 0;
+		this._stage = 0;
+		this._stack = [[]];
+		this._recursion = 0;
+		this._locked = false;
 	}
 
 	public get code() {
@@ -124,6 +134,7 @@ export class SaveEncoder {
 
 	encode(): boolean {
 		if (this._locked) return false;
+		this._stack[this._stage][stackMaxIndex + 1] = 3;
 		for (let stage of this._stack) {
 			if (stage.length > stackMaxIndex + 1) error("Stage stack size exceeded!", 2);
 			this._code.push(encode(stage, this._p, charList, charList.length));
@@ -140,13 +151,50 @@ export class SaveDecoder {
 	private _index: number;
 	private _recursion: number;
 	private readonly _p: MapPlayer;
-	private _locked: boolean;
-	constructor(whichPlayer: MapPlayer, code?: string[]) {
+	constructor(whichPlayer: MapPlayer) {
 		this._p = whichPlayer;
-		if (code) {
+		this._stack = [];
+		this._stage = 0;
+		this._index = 0;
+		this._recursion = 0;
+	}
+
+	public set code(code: string | string[]) {
+		if (Array.isArray(code)) {
 			this._code = code;
+		} else {
+			this._code.push(code);
 		}
-		// Try decode first stage
+	}
+
+	getInt(): number {
+		// There is no safety protection
+		if (this._stack.length == 0 || this._recursion > 8) return -1;
+		if (this._stack[this._stage][this._index] == null) return -1;
+		if (this._index >= stackMaxIndex) {
+			this._stage++;
+			this._index = 0;
+			this._recursion++;
+			return this.getInt();
+		}
+		this._recursion = 0;
+		this._index++;
+		return this._stack[this._stage][this._index - 1];
+	}
+
+	getAt(stage: number = this._stage, index: number = this._index): number {
+		return this._stack[stage][index];
+	}
+
+	decode() {
+		if (!this._code) return;
+		for (let str of this._code) {
+			let v = decode(str, this._p, charList, charList.length);
+			if (v.length == 0) {
+				error("Invalid code detected!");
+			}
+			this._stack.push(v);
+		}
 	}
 }
 
