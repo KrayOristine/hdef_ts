@@ -1,2 +1,2 @@
 export * from "codeChecksum";
-export * from "encoder";
+export * from "encHandler";

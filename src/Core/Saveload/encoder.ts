@@ -4,12 +4,10 @@ import { Checksum } from "codeChecksum";
 import { encode, decode } from "codeGen";
 import { Logger } from "wc3-treelib";
 
-//TODO: Create handler that turn the output code into number and vert it back to string
-
 const _forward: number[][] = [];
 const saveIndex: number[] = [0, 0, 0];
 const _reverse: number[][] = [];
-const stackMaxIndex = 70; // Maximum stack size this is a recommended size for mostly everything
+const stackMaxIndex = 70; // Maximum stack size, this is a recommended size for mostly everything
 // The largest possible i got is 90 but be careful as it may exceed string length for sync system
 
 // These are pre-generated random string list for usage for the best security
@@ -25,7 +23,7 @@ const stackMaxIndex = 70; // Maximum stack size this is a recommended size for m
 // 	">0vyRNtD7Fg(WdYKJiEqU^.@5),1{xzHk+oSCfnjXhe_#]*2OGrlwI?acu9$3|p/ML8Z!b6~}A[BQ-smTP4<`&'=V", //-- 10
 const charList = `Z{~]P,0NT4Xr6M^5mabUphSil2q}>dBeJIko*sj<@u=A_-?+&Qv!Gx.3'#(f1EwyKFR/%HYzDVL[9W)cg7|$tOC8n`; // Character list for usage
 
-export class SaveEncoder {
+export class Encoder {
 	private _code: string[];
 	private _stack: number[][];
 	private _stage: number;
@@ -84,7 +82,7 @@ export class SaveEncoder {
 		this._stack[stage][index] = value;
 	}
 
-	addInt(value: number): SaveEncoder {
+	addInt(value: number): Encoder {
 		if (this._locked) return;
 		if (this._recursion >= 8) {
 			// some how looped 8 time which usually not good
@@ -117,17 +115,17 @@ export class SaveEncoder {
 		return this; // allow method chain
 	}
 
-	addUnit(u: Unit): SaveEncoder {
+	addUnit(u: Unit): Encoder {
 		if (_forward[0][u.typeId] == null) return this.addInt(AddSaveUnit(u));
 		return this.addInt(_forward[0][u.typeId]);
 	}
 
-	addItem(i: Item): SaveEncoder {
+	addItem(i: Item): Encoder {
 		if (_forward[1][i.typeId] == null) return this.addInt(AddSaveItem(i));
 		return this.addInt(_forward[1][i.typeId]);
 	}
 
-	addAbil(a: Ability): SaveEncoder {
+	addAbil(a: Ability): Encoder {
 		if (_forward[2][a.typeId] == null) return this.addInt(AddSaveAbil(a));
 		return this.addInt(_forward[2][a.typeId]);
 	}
@@ -144,7 +142,7 @@ export class SaveEncoder {
 	}
 }
 
-export class SaveDecoder {
+export class Decoder {
 	private _code: string[];
 	private _stack: number[][];
 	private _stage: number;
@@ -188,13 +186,16 @@ export class SaveDecoder {
 
 	decode() {
 		if (!this._code) return;
-		for (let str of this._code) {
-			let v = decode(str, this._p, charList, charList.length);
-			if (v.length == 0) {
-				error("Invalid code detected!");
+		let r = xpcall(() => {
+			for (let str of this._code) {
+				let v = decode(str, this._p, charList, charList.length);
+				if (v.length == 0) {
+					error("Invalid code detected!");
+				}
+				this._stack.push(v);
 			}
-			this._stack.push(v);
-		}
+		}, Logger.LogCritical);
+		return r;
 	}
 }
 
