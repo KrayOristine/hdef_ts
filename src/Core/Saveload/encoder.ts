@@ -24,13 +24,13 @@ const stackMaxIndex = 70; // Maximum stack size, this is a recommended size for 
 const charList = `Z{~]P,0NT4Xr6M^5mabUphSil2q}>dBeJIko*sj<@u=A_-?+&Qv!Gx.3'#(f1EwyKFR/%HYzDVL[9W)cg7|$tOC8n`; // Character list for usage
 
 export class Encoder {
-	private _code: string[];
-	private _stack: number[][];
-	private _stage: number;
-	private _index: number;
-	private _recursion: number;
-	private readonly _p: MapPlayer;
-	private _locked: boolean;
+	protected _code: string[];
+	protected _stack: number[][];
+	protected _stage: number;
+	protected _index: number;
+	protected _recursion: number;
+	protected readonly _p: MapPlayer;
+	protected _locked: boolean;
 
 	constructor(whichPlayer: MapPlayer) {
 		this._p = whichPlayer;
@@ -143,12 +143,12 @@ export class Encoder {
 }
 
 export class Decoder {
-	private _code: string[];
-	private _stack: number[][];
-	private _stage: number;
-	private _index: number;
-	private _recursion: number;
-	private readonly _p: MapPlayer;
+	protected _code: string[];
+	protected _stack: number[][];
+	protected _stage: number;
+	protected _index: number;
+	protected _recursion: number;
+	protected readonly _p: MapPlayer;
 	constructor(whichPlayer: MapPlayer) {
 		this._p = whichPlayer;
 		this._stack = [];
