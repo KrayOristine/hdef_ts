@@ -1,2 +1,2 @@
 export * from "Ability";
-export * from "LinkedList/DoublyLinkedList";
+export * as LinkedList from "LinkedList/DoublyLinkedList";
