@@ -26,7 +26,7 @@ export class ArcTT {
 		this.tmr.destroy();
 	}
 
-	private setup(str: string, u: Unit, x: number, y: number, duration: number, size: number, p: MapPlayer) {
+	createEx(str: string, u: Unit, x: number, y: number, duration: number, size: number, p: MapPlayer) {
 		let a = ANGLE_RND ? GetRandomReal(0, 2 * bj_PI) : ANGLE;
 		let timeScale = Math.max(duration, 0.001);
 		let t = TIME_LIFE * timeScale;
@@ -47,7 +47,7 @@ export class ArcTT {
 			pass += 0.03125;
 			if (!tt) return;
 			if (pass >= t) {
-				this.tmr.pause();
+				this.destroy();
 				return;
 			}
 			let point = Math.sin(bj_PI * ((t - pass) / timeScale));
@@ -62,6 +62,6 @@ export class ArcTT {
 	}
 
 	create(str: string, u: Unit, duration: number, size: number) {
-		return this.setup(str, u, u.x, u.y, duration, size, MapPlayer.fromLocal());
+		return this.createEx(str, u, u.x, u.y, duration, size, MapPlayer.fromLocal());
 	}
 }

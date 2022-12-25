@@ -56,6 +56,7 @@ export interface OzDamageTrigger {
 	filter: DamageFilter;
 	minAOE: number;
 	weight: number;
+	readonly regAt: string;
 }
 
 //Internal type, only references and auto complete
@@ -69,7 +70,7 @@ type EventList = {
 	source: LinkedList<OzDamageTrigger>;
 };
 
-export enum OzDamageEvent {
+export const enum OzDamageEvent {
 	EVENT_ON_HIT = "hit",
 	EVENT_ON_DAMAGE = "damage",
 	EVENT_ON_ARMOR = "armor",
@@ -79,7 +80,7 @@ export enum OzDamageEvent {
 	EVENT_SOURCE = "source",
 }
 
-export enum OzDamageEngineType {
+export const enum OzDamageEngineType {
 	raw = 1,
 	internal = 2,
 	default = 3,
@@ -92,7 +93,7 @@ export enum OzDamageEngineType {
 	pet = 10,
 }
 
-export enum OzDamageScriptType {
+export const enum OzDamageScriptType {
 	none = 0,
 	attack = 1,
 	activeSpell = 2,
@@ -101,11 +102,18 @@ export enum OzDamageScriptType {
 	item = 5,
 }
 
-export enum OzDamageGameType {
+export const enum OzDamageGameType {
 	undefined = 0,
 	physical = 1,
 	magic = 2,
 	pure = 3,
+}
+export const enum OzDamageUserType {
+	none = 0,
+	heal = 1,
+	crit = 2,
+	shield = 3,
+	miss = 4,
 }
 
 const damagedOrAfter = () => Damage.current.damageType == DAMAGE_TYPE_UNKNOWN;
@@ -323,6 +331,7 @@ export class Damage {
 			minAOE: 0,
 			hasFilters: false,
 			filter: null,
+			regAt: whichEvent,
 		};
 		this._lastReg = dt;
 
@@ -336,6 +345,13 @@ export class Damage {
 			node.insertBefore(dt);
 		} else head.insertAtStart(dt);
 		return dt;
+	}
+
+	public static remove(dev: OzDamageTrigger) {
+		if (this._lastReg == dev) this._lastReg = null;
+		let e = dev.regAt;
+		const l: LinkedList<OzDamageTrigger> = this.eventList[e]
+		l.search((v)=>v==dev).remove()
 	}
 
 	public static addFilter(trig: OzDamageTrigger, filter: DamageFilter) {
