@@ -9,7 +9,7 @@ const cd = 100 / ct.length;
 const cc: boolean[] = [];
 const co: boolean[] = [];
 const tg = new Trigger();
-var qq = 0;
+let qq = 0;
 
 function render(rate: number) {
 	let a = rate > 100 ? ct.length : Math.floor(rate / cd);
@@ -29,7 +29,7 @@ function _onCast() {
 	cc[owner.id] = false;
 	co[owner.id] = true;
 	qq++;
-	if (tg.enabled == false) tg.enabled = true;
+	if (!tg.enabled) tg.enabled = true;
 	let rate = 3.125 / castTime;
 	let now = 0;
 	let bar: TextTag;
@@ -45,7 +45,7 @@ function _onCast() {
 	let t2 = new Timer();
 	t.start(0.03125, true, () => {
 		if (!bar) return;
-		if (cc[owner.id] == true || castTime < 0) {
+		if (cc[owner.id] || castTime < 0) {
 			bar.setText(string.format("|c00ff0000[|r%s|c00ff0000]|r", cc[owner.id] ? "CANCELLED" : "CASTED"), 0.03);
 			t.pause();
 			t.destroy();

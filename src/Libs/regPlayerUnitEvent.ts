@@ -9,7 +9,7 @@ const gfun: Function[][] = [];
 function addRegister(id: number, e: playerunitevent, code: Function) {
 	if (!gtrg[id]) {
 		gtrg[id] = new Trigger();
-		for (let i = 0; bj_MAX_PLAYERS; i++) {
+		for (let i = 0; i < bj_MAX_PLAYERS; i++) {
 			gtrg[id].registerPlayerUnitEvent(MapPlayer.fromIndex(i), e, null);
 		}
 		gtrg[id].addCondition(() => {
@@ -53,7 +53,7 @@ class Spell {
 	public readonly z: number;
 	public readonly level: number;
 	constructor() {
-		this.ability = new Ability(GetSpellAbility(), GetSpellAbilityId());
+		this.ability = new Ability(GetSpellAbility());
 		this.source = Unit.fromHandle(GetTriggerUnit());
 		this.target = Unit.fromHandle(GetSpellTargetUnit());
 		this.sourceIsHero = this.source.isUnitType(UNIT_TYPE_HERO);
@@ -66,7 +66,7 @@ class Spell {
 	}
 }
 
-export var OzSpell: Spell;
+export let OzSpell: Spell;
 
 function _handleSpellEffect() {
 	OzSpell = new Spell();

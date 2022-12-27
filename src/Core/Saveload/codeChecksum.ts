@@ -11,7 +11,7 @@ export class Checksum {
 	}
 
 	public static readonly alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	public static readonly alphaLen = this.alphabet.length;
+	public static readonly alphaLen = Checksum.alphabet.length;
 
 	private static toChar(v: number, mult: number = 0): string {
 		let loc: number;

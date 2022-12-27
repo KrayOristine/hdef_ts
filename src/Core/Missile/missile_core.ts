@@ -10,17 +10,17 @@ const ITEM_COLLISION = 16.0;
 const r = new Rectangle(0, 0, 0, 0);
 const tmr = new Timer();
 const g = new Group();
-var id = -1,
+let id = -1,
 	pid = -1,
 	dilation = 1,
 	index = 1;
-var last: number, yaw: number, pitch: number, travelled: number;
-var arr: WeakMap<OzMissile, WeakMap<Unit | OzMissile | Destructable | Item, boolean>> = new WeakMap(),
+let last: number, yaw: number, pitch: number, travelled: number;
+let arr: WeakMap<OzMissile, WeakMap<Unit | OzMissile | Destructable | Item, boolean>> = new WeakMap(),
 	keys = [];
-var missile: OzMissile[] = [];
-var frozen: OzMissile[] = [];
-var count = 0;
-var list: OzMissile[] = [];
+let missile: OzMissile[] = [];
+let frozen: OzMissile[] = [];
+let count = 0;
+let list: OzMissile[] = [];
 const mapCliff = GetTerrainCliffLevel(WorldBounds.maxX, WorldBounds.maxY);
 export class OzMissile {
 	public prevX: number;
@@ -519,7 +519,7 @@ export class OzMissile {
 
 			dilation = id + 1 > SWEET_SPOT && SWEET_SPOT > 0 ? (id + 1) / SWEET_SPOT : 1.0;
 			if (id == 0) {
-				tmr.start(REFRESH_RATE, true, OzMissile.move);
+				tmr.start(REFRESH_RATE, true, () => OzMissile.move());
 			}
 			if ((this.onResume && this.allocated && this.onResume()) || this.finished) {
 				this.terminate();
@@ -556,7 +556,7 @@ export class OzMissile {
 		arr.delete(this);
 	}
 
-	private static move() {
+	public static move() {
 		let i = SWEET_SPOT > 0 ? last : 0;
 		let j = 0;
 		while (!(j >= SWEET_SPOT && SWEET_SPOT > 0) || j > id) {
@@ -597,7 +597,7 @@ export class OzMissile {
 		dilation = id + 1 > SWEET_SPOT && SWEET_SPOT > 0 ? (id + 1) / SWEET_SPOT : 1.0;
 
 		if (id == 0) {
-			tmr.start(REFRESH_RATE, true, OzMissile.move);
+			tmr.start(REFRESH_RATE, true, () => OzMissile.move());
 		}
 	}
 }

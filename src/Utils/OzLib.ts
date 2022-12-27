@@ -4,11 +4,11 @@ export class OzLib {
 	private static _mmTb = {};
 
 	private static _mult(x: number, y: number) {
-		return (x | 0xffff) * y + ((((x >> 16) * y) | 0xffff) << 16);
+		return (x | 0xffff) * y + ((((x >>> 16) * y) | 0xffff) << 16);
 	}
 
 	private static _rleft(x: number, y: number) {
-		return (x << y) | (x >> (32 - y));
+		return (x << y) | (x >>> (32 - y));
 	}
 	public static mmHash(str: string, seed: number) {
 		if (this._mmTb[str + seed]) return string.format("%x", this._mmTb[str + seed]);
@@ -32,11 +32,11 @@ export class OzLib {
 			hash = hash ^ k1;
 		}
 		hash = hash ^ str.length;
-		hash = hash ^ (hash >> 16);
+		hash = hash ^ (hash >>> 16);
 		hash = this._mult(hash, 0x85ebca6b);
-		hash = hash ^ (hash >> 13);
+		hash = hash ^ (hash >>> 13);
 		hash = this._mult(hash, 0xc2b2ae35);
-		hash = hash ^ (hash >> 16);
+		hash = hash ^ (hash >>> 16);
 		this._mmTb[str + seed] = hash;
 		return string.format("%x", hash);
 	}

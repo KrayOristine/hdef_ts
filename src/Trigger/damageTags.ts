@@ -35,5 +35,5 @@ for (let i = 0; i < bj_MAX_PLAYERS; i++) {
 }
 et.addAction(() => {
 	let pid = GetPlayerId(GetTriggerPlayer());
-	enabled[pid] = enabled[pid] == null ? true : !enabled[pid];
+	enabled[pid] = !enabled[pid];
 });

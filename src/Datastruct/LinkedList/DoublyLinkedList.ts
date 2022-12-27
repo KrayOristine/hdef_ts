@@ -201,21 +201,21 @@ export default class LinkedList<NodeData = any> {
 	 * ```
 	 * @param data Data to be stored in the node, accepts any number of arguments
 	 */
-	public prepend(...args: NodeData[]): LinkedList<NodeData> {
-		const reverseArgs = Array.from(args).reverse();
-		for (const data of reverseArgs) {
-			const node = new LinkedListNode(data, null, this.head, this);
-			if (this.tail === null) {
-				this.tail = node;
-			}
-			if (this.head !== null) {
-				this.head.prev = node;
-			}
-			this.head = node;
-			this.size += 1;
-		}
-		return this;
-	}
+	// public prepend(...args: NodeData[]): LinkedList<NodeData> {
+	// 	const reverseArgs = Array.from(args).reverse();
+	// 	for (const data of reverseArgs) {
+	// 		const node = new LinkedListNode(data, null, this.head, this);
+	// 		if (this.tail === null) {
+	// 			this.tail = node;
+	// 		}
+	// 		if (this.head !== null) {
+	// 			this.head.prev = node;
+	// 		}
+	// 		this.head = node;
+	// 		this.size += 1;
+	// 	}
+	// 	return this;
+	// }
 
 	/**
 	 * Insert a new node at a given index position. If index is
@@ -231,9 +231,9 @@ export default class LinkedList<NodeData = any> {
 		if (this.head === null) {
 			return this.append(data);
 		}
-		if (index <= 0) {
-			return this.prepend(data);
-		}
+		// if (index <= 0) {
+		// 	return this.prepend(data);
+		// }
 
 		let currentNode = this.head;
 		let currentIndex = 0;

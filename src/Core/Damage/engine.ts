@@ -387,7 +387,7 @@ export class Damage {
 
 	private static breakCheck = {
 		hit: () => false,
-		damage: () => this.override || Damage.current.engineType[0] == 2,
+		damage: () => Damage.override || Damage.current.engineType[0] == 2,
 		armor: () => Damage.current.damage <= 0.0,
 		damaged: () => damagedOrAfter,
 		after: () => damagedOrAfter,
