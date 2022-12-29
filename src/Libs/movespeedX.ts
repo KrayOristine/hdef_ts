@@ -1,5 +1,4 @@
 import { W3TS_HOOK, addScriptHook, Unit, Trigger, Timer, tsGlobals } from "w3ts";
-import { Hooks } from "wc3-treelib";
 
 /*
  *  Movement Speed X by PurgeAndFire
