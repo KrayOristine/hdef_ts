@@ -90,3 +90,7 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# Personal ignore
+Luafuck.exe
+Luafuck.pdb

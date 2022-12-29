@@ -1,6 +1,10 @@
 import { MapPlayer } from "w3ts";
 import { Checksum } from "codeChecksum";
 
+// This shit is yoinked from Ashton Luk (aka. dhguardianes) encoder
+// Don't ask me where the source link
+// It's just here to "fill" up the missing hole for save load
+
 function verify(name: string, buffer: string) {
 	let s = Checksum.serial(name + tostring(0x1000) + buffer).toLowerCase();
 	const alpha = "abcdefghijklmnopqrstuvwxyz";

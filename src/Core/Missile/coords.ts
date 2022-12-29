@@ -15,7 +15,9 @@ export class Coords {
 	}
 
 	move(x: number, y: number, z: number) {
-		(this.x = x), (this.y = y), (this.z = z + LocGetZ(x, y));
+		this.x = x;
+		this.y = y;
+		this.z = z + LocGetZ(x, y);
 		if (this.ref != this) {
 			this.calc(this.ref);
 		}
