@@ -18,6 +18,7 @@ function tsMain() {
 
 	new Timer().start(1.0, true, () => {
 		unit.color = Players[math.random(0, bj_MAX_PLAYERS)].color;
+		print("os.time is: " + os.time());
 	});
 }
 

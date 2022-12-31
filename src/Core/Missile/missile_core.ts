@@ -3,6 +3,9 @@ import { Timer, Group, Unit, MapPlayer, Destructable, Item, Rectangle } from "w3
 import { Coords } from "coords";
 import { MissileEffect } from "effect";
 import { LocGetZ, WorldBounds } from "Utils";
+
+//TODO Convert this into abstract class
+
 const REFRESH_RATE = 1 / 40;
 const SWEET_SPOT = 300;
 const UNIT_COLLISION = 128.0;
@@ -88,9 +91,6 @@ export class OzMissile {
 	private index: number;
 	private pkey: number;
 	constructor(source: Unit, target: Unit) {
-		this.source = source;
-		this.target = target;
-		this.owner = source.owner;
 		arr.set(this, new WeakMap());
 		if (keys.length > 0) {
 			this.key = keys[keys.length];
@@ -100,6 +100,9 @@ export class OzMissile {
 			index++;
 		}
 
+		this.source = source;
+		this.target = target;
+		this.owner = source.owner;
 		this.allocated = true;
 		this.onHit = null;
 		this.onMissile = null;
@@ -113,6 +116,7 @@ export class OzMissile {
 		this.onBoundaries = null;
 		this.reset();
 	}
+
 	reset() {
 		this.launched = false;
 		this.useZ = false;
@@ -313,6 +317,41 @@ export class OzMissile {
 	set animation(value: number) {
 		this._animation = value;
 		this.effect.animation(value);
+	}
+
+	bounce() {
+		this.origin.move(this.x, this.y, this.z - LocGetZ(this.x, this.y));
+
+		travelled = 0;
+		this.travel = 0;
+		this.finished = false;
+		return this;
+	}
+
+	deflect(x: number, y: number, z: number) {
+		let lz = LocGetZ(this.x, this.y);
+
+		if (this.z < lz) {
+			this.nextX = this.prevX;
+			this.nextY = this.prevY;
+			this.nextZ = this.prevZ;
+		}
+
+		this.toZ = z;
+		this.target = null;
+		this.impact.move(x, y, z);
+		this.origin.move(this.x, this.y, this.z - lz);
+
+		travelled = 0;
+		this.travel = 0;
+		this.finished = false;
+		return this;
+	}
+
+	deflectTarget(u: Unit) {
+		this.deflect(u.x, u.y, this.toZ);
+		this.target = u;
+		return this;
 	}
 
 	attachEffect(x: number, y: number, z: number, scale: number, model: string) {
