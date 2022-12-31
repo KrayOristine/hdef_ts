@@ -94,3 +94,5 @@ typings/
 # Personal ignore
 Luafuck.exe
 Luafuck.pdb
+*.code-workspace
+maps/
