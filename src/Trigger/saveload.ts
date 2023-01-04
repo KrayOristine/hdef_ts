@@ -102,9 +102,9 @@ addScriptHook(W3TS_HOOK.TRIGGER_BEFORE, () => {
 	loadTrg[1] = new Trigger();
 	for (let i = 0; i < bj_MAX_PLAYERS; i++) {
 		let p = MapPlayer.fromIndex(i);
-		saveTrg[0].registerPlayerChatEvent(p, CHAT.saveNormal, false);
-		saveTrg[1].registerPlayerChatEvent(p, CHAT.saveAuto, false);
-		loadTrg[0].registerPlayerChatEvent(p, CHAT.loadNormal, false);
-		loadTrg[1].registerPlayerChatEvent(p, CHAT.loadAuto, false);
+		saveTrg[0].registerPlayerChatEvent(p, CMD_REF + CHAT.saveNormal, false);
+		saveTrg[1].registerPlayerChatEvent(p, CMD_REF + CHAT.saveAuto, false);
+		loadTrg[0].registerPlayerChatEvent(p, CMD_REF + CHAT.loadNormal, false);
+		loadTrg[1].registerPlayerChatEvent(p, CMD_REF + CHAT.loadAuto, false);
 	}
 });

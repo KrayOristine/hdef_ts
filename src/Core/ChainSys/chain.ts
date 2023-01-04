@@ -4,7 +4,7 @@ import { Group, MapPlayer, Unit } from "w3ts";
 
 /*
  *-----------------------------------------------------------------
- *	OzMissile - Chain System Extension
+ *	OzMissile - Chain System Extension - v1.1
  *	Created by: Ozzzzymaniac
  *
  *	This extension allow you to create a chain missile that handle most of the work
@@ -24,6 +24,7 @@ import { Group, MapPlayer, Unit } from "w3ts";
  *
  *  Version Tree:
  * 		+ 1.0: Initial release
+ * 		+ 1.1: Improved mech, should be faster now
  *-----------------------------------------------------------------
  */
 
@@ -138,6 +139,7 @@ export abstract class OzChain {
 	}
 
 	protected fire(source: Unit, target: Unit) {
+		if (!target || !source) return; // Who the fuck want to do this shit?
 		this.ms.model = this.model;
 		this.ms.speed = this.speed || 1000;
 		this.ms.arc = this.arc || 0;
