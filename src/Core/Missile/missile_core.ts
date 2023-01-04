@@ -275,6 +275,13 @@ export class OzMissile {
 
 	set vision(v: number) {
 		this._vision = v;
+		if (v <= 0) {
+			if (this.dummy != null) {
+				Pool.recycle(this.dummy);
+				this.dummy = null;
+			}
+			return;
+		} // No need to do anything, vision is already gone;
 
 		if (this.dummy) this.dummy.setOwner(this.owner, false);
 		else {

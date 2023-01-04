@@ -89,9 +89,11 @@ export abstract class OzChain {
 		this.travelled = 0;
 	}
 
-	private init() {
+	protected init() {
 		this.ms = new OzMissile(null, null);
 		this.g = new Group();
+		this.ms.collision = 100;
+		this.ms.vision = 0;
 		this.ms.onHit = (target) => {
 			if (target == this.ms.target && this.current.jumpAmt <= this.maxBounce) {
 				this.previous.target = this.current.target;
@@ -120,11 +122,11 @@ export abstract class OzChain {
 				this.next.target = newTarget;
 				this.next.jumpAmt++;
 				if (this.onBounce && this.onBounce()) return true;
-				if (this.lightning) attachLightning(this.current.source, newTarget, this.lightning);
-				this.ms.d;
-			} else if (this.current.jumpAmt >= this.maxBounce) {
-				return true;
+				if (this.lightning) attachLightning(this.current.target, newTarget, this.lightning);
+				this.ms.deflectTarget(newTarget);
 			}
+			if (this.current.jumpAmt >= this.maxBounce) return true;
+
 			return false;
 		};
 		this.ms.onRemove = () => {
@@ -133,6 +135,16 @@ export abstract class OzChain {
 			if (this.autoReset) this.reset();
 			return true;
 		};
+	}
+
+	protected fire(source: Unit, target: Unit) {
+		this.ms.model = this.model;
+		this.ms.speed = this.speed || 1000;
+		this.ms.arc = this.arc || 0;
+		this.ms.source = source;
+		this.ms.target = target;
+		this.ms.owner = source.owner;
+		this.ms.launch();
 	}
 
 	protected filter(): boolean {
