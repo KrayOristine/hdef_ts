@@ -96,3 +96,4 @@ Luafuck.exe
 Luafuck.pdb
 *.code-workspace
 maps/
+map_packed/

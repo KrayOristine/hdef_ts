@@ -350,8 +350,8 @@ export class Damage {
 	public static remove(dev: OzDamageTrigger) {
 		if (this._lastReg == dev) this._lastReg = null;
 		let e = dev.regAt;
-		const l: LinkedList<OzDamageTrigger> = this.eventList[e]
-		l.search((v)=>v==dev).remove()
+		const l: LinkedList<OzDamageTrigger> = this.eventList[e];
+		l.search((v) => v == dev).remove();
 	}
 
 	public static addFilter(trig: OzDamageTrigger, filter: DamageFilter) {
@@ -517,7 +517,7 @@ export class Damage {
 		return d;
 	}
 
-	// End System, Begin Blizz3 API
+	// End System, Begin Just Another Scripting Syntax 2 API
 
 	private static onAOEEnd() {
 		this.runEvent("source");
@@ -571,7 +571,7 @@ export class Damage {
 		if (this.recursiveStacks.length > 0) {
 			this.kicking = true;
 			let i = 1;
-			let ex;
+			let ex: number;
 			do {
 				this.sleepDepth++;
 				ex = this.recursiveStacks.length;

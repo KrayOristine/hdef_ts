@@ -2,7 +2,7 @@ import { W3TS_HOOK, addScriptHook, Unit, Trigger, Timer, tsGlobals } from "w3ts"
 
 /*
  *  Movement Speed X by PurgeAndFire
- *  Ported to TS by Ozzzzymaniac
+ *  Ported to TS by Ozzzzymaniac and also changed a little bit
  *
  *  Original: https://www.hiveworkshop.com/threads/movespeedx-for-gui-v1-1-0-0.207607/
  */
@@ -11,7 +11,6 @@ const CHECK_PERIOD = 0.02; // The lower the period, the smoother the movement se
 const orderMove = new Trigger();
 const otherOrder = new Trigger();
 const unitList: WeakMap<Unit, MSX> = new WeakMap<Unit, MSX>();
-let rAmt: number = 0;
 
 addScriptHook(W3TS_HOOK.MAIN_BEFORE, () => {
 	for (let i = 0; i < bj_MAX_PLAYERS; i++) {
@@ -118,26 +117,26 @@ class MSX {
 				unitList.delete(this.u);
 				return;
 			}
-			let newx = this.u.x;
-			let newy = this.u.y;
+			let newX = this.u.x;
+			let newY = this.u.y;
 			// let face = this.u.facing
 			if ((math.abs(this.nx - this.lx) > this.loopPeriod || math.abs(this.ny - this.ly) > this.loopPeriod) && !this.u.paused) {
-				let dx = newx - this.lx;
-				let dy = newy - this.ly;
+				let dx = newX - this.lx;
+				let dy = newY - this.ly;
 				let dis = math.sqrt(dx * dx + dy * dy);
 				//face = math.deg(math.atan(dx,dy))
 				//this.u.setFacingEx(face);
 				this.nx = (dx / dis) * this.speed;
 				this.ny = (dy / dis) * this.speed;
 
-				newx += this.nx;
-				newy += this.ny;
+				newX += this.nx;
+				newY += this.ny;
 
-				this.u.x = newx;
-				this.u.y = newy;
+				this.u.x = newX;
+				this.u.y = newY;
 			}
-			this.lx = newx;
-			this.ly = newy;
+			this.lx = newX;
+			this.ly = newY;
 		});
 	}
 }
