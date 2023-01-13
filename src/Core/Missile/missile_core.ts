@@ -4,7 +4,8 @@ import { Coords } from "coords";
 import { MissileEffect } from "effect";
 import { LocGetZ, WorldBounds } from "Utils";
 
-//TODO Convert this into abstract class
+// Can't convert to abstract class as it too hard-coded
+// Still able to remove cancel it function removal
 
 const REFRESH_RATE = 1 / 40;
 const SWEET_SPOT = 300;

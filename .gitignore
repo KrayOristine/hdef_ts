@@ -97,3 +97,4 @@ Luafuck.pdb
 *.code-workspace
 maps/
 map_packed/
+map_image/

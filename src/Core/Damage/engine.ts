@@ -13,10 +13,9 @@ import { LinkedList, Logger } from "wc3-treelib";
 const DEATH_VAL = 0.405; // Value which unit is determined as death
 const LIMBO_DEPTH = 8; // How much can the engine will be able to recursive
 export interface DamageInstance {
-	engineType: number[];
-	scriptType: number[];
-	gameType: number[];
-	userType: number[];
+	engineType: boolean[];
+	gameType: boolean[];
+	userType: boolean[];
 	damage: number;
 	userAmt?: number;
 	source: Unit;
@@ -245,13 +244,11 @@ export class Damage {
 	private static t3: Trigger;
 	private static dreaming: boolean = false;
 	private static sleepDepth: number = 0;
-	private static sleepSource: unit[];
-	private static sleepTarget: unit[];
 	private static kicking: boolean = false;
 	private static eventsRun: boolean = false;
 	public static current: DamageInstance; // The current execution damage context
 	private static sourceAOE: number = 0;
-	private static sourceStacks: number = 0;
+	private static sourceStacks: number = 0; // Amount of target hit by the same sources
 	private static orgSource: unit;
 	private static orgTarget: unit;
 	public static next: DamageInstance; // The next value to apply if exist
@@ -387,7 +384,7 @@ export class Damage {
 
 	private static breakCheck = {
 		hit: () => false,
-		damage: () => Damage.override || Damage.current.engineType[0] == 2,
+		damage: () => Damage.override || Damage.current.engineType[1],
 		armor: () => Damage.current.damage <= 0.0,
 		damaged: () => damagedOrAfter,
 		after: () => damagedOrAfter,
@@ -454,9 +451,8 @@ export class Damage {
 			damageType: damageType,
 			weaponType: weaponType,
 			userType: [],
-			engineType: [0],
-			scriptType: [0],
-			gameType: [0],
+			engineType: [],
+			gameType: [],
 			isMelee: IsUnitType(source, UNIT_TYPE_MELEE_ATTACKER) && !isRanged,
 			isSpell: attackType == ATTACK_TYPE_NORMAL && damageType != DAMAGE_TYPE_NORMAL,
 			prevAmt: amt,
@@ -469,7 +465,6 @@ export class Damage {
 		if (this.next) {
 			d.userType = this.next.userType || d.userType;
 			d.engineType = this.next.engineType || d.engineType;
-			d.scriptType = this.next.scriptType || d.scriptType;
 			d.gameType = this.next.gameType || d.gameType;
 			d.attackType = this.next.attackType || d.attackType;
 			d.damageType = this.next.damageType || d.damageType;
@@ -488,7 +483,7 @@ export class Damage {
 		d.recursive = this.userIndex;
 		if (!this.kicking && this.recursiveSource.get(d.source.handle) && this.recursiveTarget.get(d.target.handle)) {
 			if (!this.userIndex.isInception) this.userIndex.isFrozen = true;
-			else {
+			else if (!this.userIndex.isFrozen && this.userIndex.sleepDepth < this.sleepDepth){
 				this.userIndex.sleepDepth++;
 				this.userIndex.isFrozen = this.userIndex.sleepDepth >= LIMBO_DEPTH;
 			}
@@ -544,6 +539,7 @@ export class Damage {
 	}
 
 	private static doPreEvents(d: DamageInstance, natural: boolean) {
+		d.pierceArmor = 0;
 		this.current = d;
 		this.recursiveSource.set(d.source.handle, true);
 		this.recursiveTarget.set(d.target.handle, true);
