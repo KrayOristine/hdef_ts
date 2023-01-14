@@ -5,14 +5,6 @@ import { TextEncoder } from "./jsNative";
 export class OzLib {
 	private static _mmTb = {};
 
-	private static _mult(x: number, y: number) {
-		return (x | 0xffff) * y + ((((x >>> 16) * y) | 0xffff) << 16);
-	}
-
-	private static _rleft(x: number, y: number) {
-		return (x << y) | (x >>> (32 - y));
-	}
-
 	/**
 	 * TS Implementation of MurmurHash2
 	 *
@@ -24,7 +16,10 @@ export class OzLib {
 	 * @return 32-bit positive integer hash
 	 */
 	public static mmHash2(str: Uint8Array | string, seed: number): number {
-		if (typeof str === "string") str = TextEncoder.encode(str);
+		if (typeof str === "string") {
+			if (this._mmTb[str+seed]) return this._mmTb[str+seed];
+			str = TextEncoder.encode(str);
+		}
 		let l = str.length,
 			h = seed ^ l,
 			i = 0,
@@ -73,7 +68,10 @@ export class OzLib {
 	 * @return 32-bit positive integer hash
 	 */
 	public static mmHash3(key: Uint8Array | string, seed: number): number {
-		if (typeof key === "string") key = TextEncoder.encode(key);
+		if (typeof key === "string") {
+			if (this._mmTb[key+seed]) return this._mmTb[key+seed];
+			key = TextEncoder.encode(key);
+		}
 
 		let remainder: number, bytes: number, h1: number, h1b: number, c1: number, c2: number, k1: number, i: number;
 

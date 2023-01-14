@@ -105,7 +105,7 @@ export abstract class OzChain {
 				if (this.onHit && this.onHit()) return true;
 				// Is valid for next jump?
 				if (this.bounceRange <= 0 || this.next.jumpAmt > this.maxBounce) return true;
-				if (this.onFilter) this.g.enumUnitsInRange(target.x, target.y, this.bounceRange, this.filter);
+				if (this.onFilter) this.g.enumUnitsInRange(target.x, target.y, this.bounceRange, ()=>this.filter());
 				else this.g.enumUnitsInRange(target.x, target.y, this.bounceRange, null);
 				let s = this.g.size - 1;
 				if (s < 0) return true; // No target to bounce to
