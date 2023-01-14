@@ -68,7 +68,7 @@ class Bounds {
 export const WorldBounds: Bounds = new Bounds();
 export const MapBounds: Bounds = new Bounds();
 
-addScriptHook(W3TS_HOOK.GLOBAL_AFTER, () => {
+addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
 	MapBounds.initRect(bj_mapInitialPlayableArea);
 	WorldBounds.initRect(GetWorldBounds());
 });
