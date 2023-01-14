@@ -4,7 +4,7 @@ import { LinkedList, Logger } from "wc3-treelib";
 
 /*
  * Introducing to you a ported version of Bribe Damage Engine on TS that have almost same functionality as the original one
- * But with unlimited userType definition support! as well as slightly improved performance
+ * But with modified userType from just single into flag array
  *
  * Original version in lua by Bribe
  * Ported to TS by Ozzzzymaniac (aka. TranTrungHo71)
@@ -77,42 +77,6 @@ export const enum OzDamageEvent {
 	EVENT_AFTER_DAMAGE = "after",
 	EVENT_LETHAL = "lethal",
 	EVENT_SOURCE = "source",
-}
-
-export const enum OzDamageEngineType {
-	raw = 1,
-	internal = 2,
-	default = 3,
-	proc = 4,
-	reactive = 5,
-	basic = 6,
-	spell = 7,
-	area = 8,
-	persistance = 9,
-	pet = 10,
-}
-
-export const enum OzDamageScriptType {
-	none = 0,
-	attack = 1,
-	activeSpell = 2,
-	AOE = 3,
-	periodic = 4,
-	item = 5,
-}
-
-export const enum OzDamageGameType {
-	undefined = 0,
-	physical = 1,
-	magic = 2,
-	pure = 3,
-}
-export const enum OzDamageUserType {
-	none = 0,
-	heal = 1,
-	crit = 2,
-	shield = 3,
-	miss = 4,
 }
 
 const damagedOrAfter = () => Damage.current.damageType == DAMAGE_TYPE_UNKNOWN;
