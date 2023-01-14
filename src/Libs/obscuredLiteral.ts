@@ -1,5 +1,7 @@
 //! THIS IS A LIBRARY FOR PROTECTING YOUR NUMBERIC VALUE
 
+//* These will slow down the performance as always as any anti cheat will be
+
 export class ObscuredInt {
 	private data: string; // A data string that contain the value to be use
     private epsilon: number; // A fake value for cheater to edit
