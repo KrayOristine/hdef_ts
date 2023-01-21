@@ -1,5 +1,5 @@
-import { Damage, FLAG_USER, FLAG_ENGINE, OzDamageEvent } from "Core";
-import { ArcTT } from "Libs";
+import { Damage, FLAG_USER, FLAG_ENGINE, OzDamageEvent } from "Core/index";
+import { ArcTT } from "Libs/index";
 import { MapPlayer, Trigger, Unit, W3TS_HOOK, addScriptHook, tsGlobals } from "w3ts";
 
 let et: Trigger;
@@ -23,7 +23,7 @@ function setupTags(target: Unit, amt: number, gameType: boolean[], userType: boo
 	}
 }
 
-addScriptHook(W3TS_HOOK.MAP_START, () => {
+addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
 	dt = new Trigger();
 	et = new Trigger();
 	for (let i = 0; i < bj_MAX_PLAYERS; i++) {

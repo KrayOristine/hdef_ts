@@ -1,5 +1,5 @@
 import { SyncRequest, File, W3TS_HOOK, addScriptHook, Trigger, MapPlayer } from "w3ts";
-import { SaveEncoder, SaveDecoder, Checksum } from "Core";
+import { SaveEncoder, SaveDecoder, Checksum } from "Core/index";
 
 const CMD_REF = "-"; // What used to append other commands
 const CHAT = {
@@ -92,10 +92,11 @@ function saveNormal() {
 		// Preload("KEY PASS: " + key);
 		Preload("SECURITY: " + Checksum.sum(p.name));
 		PreloadGenEnd(saveTo + saveName + os.date("%Y%m%d%H%M%S", os.time()) + ".pld");
+		DisplayTimedTextToPlayer(p.handle, 0, 0.5, 15, "Saved to" + saveTo + saveName)
 	}
 }
 
-addScriptHook(W3TS_HOOK.TRIGGER_BEFORE, () => {
+addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
 	saveTrg[0] = new Trigger();
 	saveTrg[1] = new Trigger();
 	loadTrg[0] = new Trigger();
@@ -107,4 +108,6 @@ addScriptHook(W3TS_HOOK.TRIGGER_BEFORE, () => {
 		loadTrg[0].registerPlayerChatEvent(p, CMD_REF + CHAT.loadNormal, false);
 		loadTrg[1].registerPlayerChatEvent(p, CMD_REF + CHAT.loadAuto, false);
 	}
+
+	saveTrg[0].addAction(saveNormal);
 });

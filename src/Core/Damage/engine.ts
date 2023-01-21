@@ -80,7 +80,7 @@ export const enum OzDamageEvent {
 }
 
 const damagedOrAfter = () => Damage.current.damageType == DAMAGE_TYPE_UNKNOWN;
-addScriptHook(W3TS_HOOK.MAIN_AFTER, () => Damage.onInit());
+
 export class Damage {
 	private static readonly eventList: EventList = {
 		hit: new LinkedList<OzDamageTrigger>(),
@@ -601,3 +601,8 @@ export class Damage {
 		);
 	}
 }
+
+addScriptHook(W3TS_HOOK.MAIN_BEFORE, ()=>{
+	Damage.onInit();
+	BJDebugMsg("Damage Engine Init complete")
+});

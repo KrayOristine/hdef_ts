@@ -1,5 +1,5 @@
-import { Ability } from "Datastruct";
-import { LocGetZ, UnitGetZ } from "Utils";
+import { Ability } from "Datastruct/index";
+import { LocGetZ, UnitGetZ } from "Utils/index";
 import { Trigger, MapPlayer, Unit, addScriptHook, W3TS_HOOK } from "w3ts";
 
 //cspell: ignore gtrg,gfun
@@ -74,7 +74,7 @@ function _handleSpellEffect() {
 	sfu[-1].forEach((f) => f());
 }
 
-addScriptHook(W3TS_HOOK.TRIGGER_BEFORE, () => {
+addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
 	registerPlayerUnitEvent(EVENT_PLAYER_UNIT_SPELL_EFFECT, _handleSpellEffect);
 });
 

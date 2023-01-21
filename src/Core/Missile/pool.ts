@@ -47,4 +47,4 @@ const onInit = () => {
 	}
 };
 
-addScriptHook(W3TS_HOOK.INIT_BEFORE, onInit);
+addScriptHook(W3TS_HOOK.MAIN_AFTER, onInit);

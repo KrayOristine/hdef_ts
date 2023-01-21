@@ -75,7 +75,7 @@ function _onOrder() {
 	return false;
 }
 
-addScriptHook(W3TS_HOOK.TRIGGER_BEFORE, () => {
+addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
 	for (let i = 0; i < bj_MAX_PLAYERS; i++) {
 		tg.registerPlayerUnitEvent(Players[i], EVENT_PLAYER_UNIT_ISSUED_ORDER, null);
 	}

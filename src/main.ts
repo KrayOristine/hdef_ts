@@ -15,11 +15,6 @@ function tsMain() {
 
 	const unit = new Unit(Players[0], FourCC("hfoo"), 0, 0, 270);
 	unit.name = "TypeScript";
-
-	new Timer().start(1.0, true, () => {
-		unit.color = Players[math.random(0, bj_MAX_PLAYERS)].color;
-		print("os.time is: " + os.time());
-	});
 }
 
 addScriptHook(W3TS_HOOK.MAIN_AFTER, tsMain);

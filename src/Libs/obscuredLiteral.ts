@@ -2,6 +2,10 @@
 
 //* These will slow down the performance as always as any anti cheat will be
 
+function trunc(v: number){
+	return (v + (2**52 + 2**51) - (2**52 + 2**51))
+}
+
 export class ObscuredInt {
 	private data: string; // A data string that contain the value to be use
     private epsilon: number; // A fake value for cheater to edit
@@ -37,14 +41,14 @@ export class ObscuredFloat {
     private epsilon: number;
 
 	constructor(v: number) {
-		//* Because of the conversion, it is only safe and reversible with number below 2147.483647
-		this.data = (~(Math.ceil(v * 1000000)) & 0x7fffffff).toString(32);
-        this.epsilon = v;
+		//* Because of the conversion, it is only safe and reversible with number below 214748.3647
+		this.data = (trunc(v*10000) ^ 0x7fffffff).toString(32);
+        this.epsilon = trunc(v*10000)/10000;
 	}
 
 	get truth() {
 		//* If the above got more f, please also put f in here!
-		let t= (0x7fffffff ^ parseInt(this.data, 32)) / 1000000;
+		let t= parseFloat((0x7fffffff ^ parseInt(this.data, 32)).toString())/10000;
 
         if (this.epsilon != t){
             // Yep, cheater detected, do something with him
@@ -55,7 +59,7 @@ export class ObscuredFloat {
 
 	set val(v: number) {
 		//* Like above, if the constructor got more f, please put more in here also.
-		this.data = (~(Math.ceil(v * 1000000)) & 0x7fffffff).toString(32);
+		this.data = (trunc(v*10000) ^ 0x7fffffff).toString(32);
 	}
 }
 
@@ -67,22 +71,22 @@ export class ObscuredBool {
     constructor(v: boolean) {
         let n = v?1:0; // Convert it into number literal
         // Since it only 1 or 0, let make it godly
-        this.data = (((n << 3) ^ 0xff)|2).toString(32);
+        this.data = (((n << 3) ^ 0xff)).toString(32);
         this.epsilon = n;
     }
 
     get truth(){
-        let t = ((parseInt(this.data, 32)|2)^0xff)>>>3
-        if (t != this.epsilon){
-            // Yep, cheater detected, do something with him
-        }
+        let t = (parseInt(this.data, 32)^0xff)>>>3
+        // if (t != this.epsilon){
+        //     // Yep, cheater detected, do something with him
+        // }
 
-        return t==1; // Is is true or it was false
+        return t; // Is is true or it was false
     }
 
     set val(v: boolean){
         let n = v?1:0;
-        this.data = (((n << 3) ^ 0xff)|2).toString(32)
+        this.data = ((n << 3) ^ 0xff).toString(32)
         this.epsilon = n;
     }
 }

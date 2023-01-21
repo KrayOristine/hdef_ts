@@ -1,4 +1,4 @@
-import { Damage, OzDamageEvent, OzCreateStat, FLAG_USER } from "Core";
+import { Damage, OzDamageEvent, OzCreateStat, FLAG_USER } from "Core/index";
 import { Unit, W3TS_HOOK, addScriptHook } from "w3ts";
 
 // Requirement, create 9 ability for these stat!
