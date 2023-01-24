@@ -1,6 +1,6 @@
 import { SetUnitZ } from "Utils";
 import { addScriptHook, W3TS_HOOK, Unit, Timer, Group } from "w3ts";
-const g = new Group();
+let g;
 export const DUMMY_ID = FourCC("dumi");
 export const DUMMY_ABIL = FourCC("Amrf");
 export class Pool {
@@ -39,6 +39,7 @@ export class Pool {
 }
 
 const onInit = () => {
+	g = new Group();
 	for (let i = 0; i <= 300; i++) {
 		let u = new Unit(PLAYER_NEUTRAL_PASSIVE, DUMMY_ID, 0, 0, 0);
 		u.pauseEx(true);
@@ -47,4 +48,11 @@ const onInit = () => {
 	}
 };
 
-addScriptHook(W3TS_HOOK.MAIN_AFTER, onInit);
+addScriptHook(W3TS_HOOK.MAIN_AFTER, ()=>{
+	try {
+		onInit();
+	} catch(e){
+		print("Error during initialization of Unit Pool");
+		print(e);
+	}
+});

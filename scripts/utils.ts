@@ -25,7 +25,7 @@ export function loadJsonFile(fname: string) {
     return JSON.parse(fs.readFileSync(fname).toString());
   } catch (e) {
     logger.error(e.toString());
-    return {};
+    throw e;
   }
 }
 

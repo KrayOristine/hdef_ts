@@ -1,5 +1,5 @@
-import { Damage, FLAG_USER, FLAG_ENGINE, OzDamageEvent } from "Core/index";
-import { ArcTT } from "Libs/index";
+import { Damage, FLAG_USER, FLAG_ENGINE, OzDamageEvent } from "Core";
+import { ArcTT } from "Libs";
 import { MapPlayer, Trigger, Unit, W3TS_HOOK, addScriptHook, tsGlobals } from "w3ts";
 
 let et: Trigger;
@@ -23,7 +23,7 @@ function setupTags(target: Unit, amt: number, gameType: boolean[], userType: boo
 	}
 }
 
-addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
+function onInit(){
 	dt = new Trigger();
 	et = new Trigger();
 	for (let i = 0; i < bj_MAX_PLAYERS; i++) {
@@ -42,4 +42,13 @@ addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
 	});
 
 	Damage.register(OzDamageEvent.EVENT_AFTER_DAMAGE, 999999, null, dt);
+}
+
+addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
+	try {
+		onInit();
+	} catch (e) {
+		print("Error during initialization of Damage Tags Trigger");
+		print(e);
+	}
 });

@@ -8,7 +8,7 @@ const ct = "||||||||||||||||||||";
 const cd = 100 / ct.length;
 const cc: boolean[] = [];
 const co: boolean[] = [];
-const tg = new Trigger();
+let tg: Trigger;
 let qq = 0;
 
 function render(rate: number) {
@@ -75,10 +75,20 @@ function _onOrder() {
 	return false;
 }
 
-addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
+function onInit(){
+	tg = new Trigger();
 	for (let i = 0; i < bj_MAX_PLAYERS; i++) {
 		tg.registerPlayerUnitEvent(Players[i], EVENT_PLAYER_UNIT_ISSUED_ORDER, null);
 	}
 	tg.addCondition(_onOrder);
 	registerPlayerUnitEvent(EVENT_PLAYER_UNIT_SPELL_CHANNEL, _onCast);
+}
+
+addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
+	try {
+		onInit();
+	} catch(e){
+		print("Error during initialization of Castbar Trigger");
+		print(e);
+	}
 });

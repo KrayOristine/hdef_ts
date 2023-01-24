@@ -92,112 +92,6 @@ export class Damage {
 		source: new LinkedList<OzDamageTrigger>(),
 	};
 
-	private static initialized: boolean = false;
-	public static onInit() {
-		if (this.initialized) return;
-		this.initialized = true;
-		this.alarm = new Timer();
-		this.t1 = new Trigger();
-		this.t2 = new Trigger();
-		this.t3 = new Trigger();
-		this.targets = new Group();
-
-		this.t1.registerAnyUnitEvent(EVENT_PLAYER_UNIT_DAMAGING);
-		this.t1.addCondition(() => {
-			let d = this.createFromEvent();
-			if (this.alarmSet) {
-				if (this.totem) {
-					if (d.damageType == DAMAGE_TYPE_SPIRIT_LINK || d.damageType == DAMAGE_TYPE_DEFENSIVE || d.damageType == DAMAGE_TYPE_PLANT) {
-						this.lastInstance = this.current;
-						this.totem = false;
-						this.canKick = false;
-					} else this.failSafeClear();
-				} else this.finish();
-
-				if (d.source.handle != this.orgSource) {
-					this.onAOEEnd();
-					this.orgSource = d.source.handle;
-					this.orgTarget = d.target.handle;
-				} else if (d.target.handle == this.orgTarget) this.sourceStacks++;
-				else if (!this.targets.hasUnit(d.target)) this.sourceAOE++;
-			} else {
-				this.alarmSet = true;
-				this.alarm.start(0, false, () => {
-					this.alarmSet = false;
-					this.dreaming = false;
-					this.enable(true);
-					if (this.totem) this.failSafeClear();
-					else {
-						this.canKick = true;
-						this.kicking = false;
-						this.finish();
-					}
-					this.onAOEEnd();
-					this.current = null;
-				});
-				this.orgSource = d.source.handle;
-				this.orgTarget = d.target.handle;
-			}
-			this.targets.addUnit(d.target);
-			if (this.doPreEvents(d, true)) {
-				this.canKick = true;
-				this.finish();
-			}
-			this.totem =
-				!this.lastInstance ||
-				this.attackImmune[GetHandleId(d.attackType)] ||
-				this.damageImmune[GetHandleId(d.damageType)] ||
-				!d.target.isUnitType(UNIT_TYPE_MAGIC_IMMUNE);
-
-			return true; // Decor only, has nothing to do
-		});
-
-		this.t2.registerAnyUnitEvent(EVENT_PLAYER_UNIT_DAMAGED);
-		this.t2.addCondition(() => {
-			let r = GetEventDamage();
-			let d = this.current;
-			if (this.prepped) this.prepped = null;
-			else if (this.dreaming || d.prevAmt == 0) return;
-			else if (this.totem) this.totem = false;
-			else {
-				this.afterDamage();
-				d = this.lastInstance;
-				this.current = d;
-				this.lastInstance = null;
-				this.canKick = true;
-			}
-			this.setArmor(true);
-			d.userAmt = d.damage;
-			d.damage = r;
-
-			if (r > 0.0) {
-				this.runEvent("armor");
-				if (this.hasLethal) {
-					this.life = GetWidgetLife(d.target.handle) - d.damage;
-					if (this.life < DEATH_VAL) {
-						this.runEvent("lethal");
-						d.damage = GetWidgetLife(d.target.handle) - this.life;
-					}
-				}
-			}
-
-			if (d.damageType != DAMAGE_TYPE_UNKNOWN) this.runEvent("damaged");
-			BlzSetEventDamage(d.damage);
-			this.eventsRun = true;
-			if (d.damage == 0) this.finish();
-
-			return true; // Decor only, has nothing to do
-		});
-
-		this.t3.registerAnyUnitEvent(EVENT_PLAYER_UNIT_DAMAGING);
-		this.t3.addCondition(() => {
-			this.addRecursive(this.createFromEvent());
-			BlzSetEventDamage(0.0);
-
-			return true;
-		});
-		this.t3.enabled = false;
-	}
 	private static alarm: Timer;
 	private static alarmSet: boolean = false;
 	private static lastInstance: DamageInstance; // The previous execution damage context
@@ -600,9 +494,117 @@ export class Damage {
 			BlzGetEventWeaponType()
 		);
 	}
+
+	public static initEngine(){
+		Damage.alarm = new Timer();
+		Damage.t1 = new Trigger();
+		Damage.t2 = new Trigger();
+		Damage.t3 = new Trigger();
+		Damage.targets = new Group();
+
+		Damage.t1.registerAnyUnitEvent(EVENT_PLAYER_UNIT_DAMAGING);
+		Damage.t1.addCondition(() => {
+			let d = Damage.createFromEvent();
+			if (Damage.alarmSet) {
+				if (Damage.totem) {
+					if (d.damageType == DAMAGE_TYPE_SPIRIT_LINK || d.damageType == DAMAGE_TYPE_DEFENSIVE || d.damageType == DAMAGE_TYPE_PLANT) {
+						Damage.lastInstance = Damage.current;
+						Damage.totem = false;
+						Damage.canKick = false;
+					} else Damage.failSafeClear();
+				} else Damage.finish();
+
+				if (d.source.handle != Damage.orgSource) {
+					Damage.onAOEEnd();
+					Damage.orgSource = d.source.handle;
+					Damage.orgTarget = d.target.handle;
+				} else if (d.target.handle == Damage.orgTarget) Damage.sourceStacks++;
+				else if (!Damage.targets.hasUnit(d.target)) Damage.sourceAOE++;
+			} else {
+				Damage.alarmSet = true;
+				Damage.alarm.start(0, false, () => {
+					Damage.alarmSet = false;
+					Damage.dreaming = false;
+					Damage.enable(true);
+					if (Damage.totem) Damage.failSafeClear();
+					else {
+						Damage.canKick = true;
+						Damage.kicking = false;
+						Damage.finish();
+					}
+					Damage.onAOEEnd();
+					Damage.current = null;
+				});
+				Damage.orgSource = d.source.handle;
+				Damage.orgTarget = d.target.handle;
+			}
+			Damage.targets.addUnit(d.target);
+			if (Damage.doPreEvents(d, true)) {
+				Damage.canKick = true;
+				Damage.finish();
+			}
+			Damage.totem =
+				!Damage.lastInstance ||
+				Damage.attackImmune[GetHandleId(d.attackType)] ||
+				Damage.damageImmune[GetHandleId(d.damageType)] ||
+				!d.target.isUnitType(UNIT_TYPE_MAGIC_IMMUNE);
+
+			return true; // Decor only, has nothing to do
+		});
+
+		Damage.t2.registerAnyUnitEvent(EVENT_PLAYER_UNIT_DAMAGED);
+		Damage.t2.addCondition(() => {
+			let r = GetEventDamage();
+			let d = Damage.current;
+			if (Damage.prepped) Damage.prepped = null;
+			else if (Damage.dreaming || d.prevAmt == 0) return;
+			else if (Damage.totem) Damage.totem = false;
+			else {
+				Damage.afterDamage();
+				d = Damage.lastInstance;
+				Damage.current = d;
+				Damage.lastInstance = null;
+				Damage.canKick = true;
+			}
+			Damage.setArmor(true);
+			d.userAmt = d.damage;
+			d.damage = r;
+
+			if (r > 0.0) {
+				Damage.runEvent("armor");
+				if (Damage.hasLethal) {
+					Damage.life = GetWidgetLife(d.target.handle) - d.damage;
+					if (Damage.life < DEATH_VAL) {
+						Damage.runEvent("lethal");
+						d.damage = GetWidgetLife(d.target.handle) - Damage.life;
+					}
+				}
+			}
+
+			if (d.damageType != DAMAGE_TYPE_UNKNOWN) Damage.runEvent("damaged");
+			BlzSetEventDamage(d.damage);
+			Damage.eventsRun = true;
+			if (d.damage == 0) Damage.finish();
+
+			return true; // Decor only, has nothing to do
+		});
+
+		Damage.t3.registerAnyUnitEvent(EVENT_PLAYER_UNIT_DAMAGING);
+		Damage.t3.addCondition(() => {
+			Damage.addRecursive(Damage.createFromEvent());
+			BlzSetEventDamage(0.0);
+
+			return true;
+		});
+		Damage.t3.enabled = false;
+	}
 }
 
 addScriptHook(W3TS_HOOK.MAIN_BEFORE, ()=>{
-	Damage.onInit();
-	BJDebugMsg("Damage Engine Init complete")
+	try {
+		Damage.initEngine();
+	} catch (e) {
+		print("Error during initialization of Damage Engine");
+		print(e.toString());
+	}
 });

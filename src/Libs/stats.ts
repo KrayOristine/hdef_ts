@@ -1,4 +1,4 @@
-import { Damage, OzDamageEvent, OzCreateStat, FLAG_USER } from "Core/index";
+import { Damage, OzDamageEvent, OzCreateStat, FLAG_USER } from "Core";
 import { Unit, W3TS_HOOK, addScriptHook } from "w3ts";
 
 // Requirement, create 9 ability for these stat!
@@ -245,4 +245,11 @@ function onInit() {
 	});
 }
 
-addScriptHook(W3TS_HOOK.MAIN_BEFORE, onInit);
+addScriptHook(W3TS_HOOK.MAIN_BEFORE, ()=>{
+	try {
+		onInit();
+	} catch (e) {
+		print("Error during initialization of Stats System");
+		print(e);
+	}
+});

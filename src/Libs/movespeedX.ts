@@ -12,7 +12,7 @@ const orderMove = new Trigger();
 const otherOrder = new Trigger();
 const unitList: WeakMap<Unit, MSX> = new WeakMap<Unit, MSX>();
 
-addScriptHook(W3TS_HOOK.MAIN_BEFORE, () => {
+const init = ()=>{
 	for (let i = 0; i < bj_MAX_PLAYERS; i++) {
 		orderMove.registerPlayerUnitEvent(tsGlobals.Players[i], EVENT_PLAYER_UNIT_ISSUED_POINT_ORDER, null);
 		orderMove.registerPlayerUnitEvent(tsGlobals.Players[i], EVENT_PLAYER_UNIT_ISSUED_TARGET_ORDER, null);
@@ -38,6 +38,15 @@ addScriptHook(W3TS_HOOK.MAIN_BEFORE, () => {
 		}
 		return true;
 	});
+}
+
+addScriptHook(W3TS_HOOK.MAIN_BEFORE, () => {
+	try {
+		init();
+	} catch (e) {
+		print("Error during initialization of Movement Speed X");
+		print(e);
+	}
 });
 
 const oldSet = _G.SetUnitMoveSpeed;

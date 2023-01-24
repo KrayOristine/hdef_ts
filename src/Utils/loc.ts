@@ -1,6 +1,7 @@
 import { Unit } from "w3ts";
-export const zeroLoc = Location(0, 0);
-const cacheCC = {};
+
+let zeroLoc;
+let CachedFourCC: {[key: string]: number} = {};
 export function LocGetZ(atX: number, atY: number) {
 	MoveLocation(zeroLoc, atX, atY);
 	return GetLocationZ(zeroLoc);
@@ -15,9 +16,10 @@ export function UnitGetZ(whichUnit: Unit) {
 }
 
 export function FastCC(s: string): number {
-	if (s.length > 4) return;
-	if (!cacheCC[s]) {
-		cacheCC[s] = FourCC(s);
-	}
-	return cacheCC[s];
+	if (s.length > 4 || s.length == 0) return;
+
+	if (CachedFourCC[s]) return CachedFourCC[s]
+
+	CachedFourCC[s] = FourCC(s);
+	return CachedFourCC[s];
 }

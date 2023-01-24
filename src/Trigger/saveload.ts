@@ -1,5 +1,5 @@
 import { SyncRequest, File, W3TS_HOOK, addScriptHook, Trigger, MapPlayer } from "w3ts";
-import { SaveEncoder, SaveDecoder, Checksum } from "Core/index";
+import { SaveEncoder, SaveDecoder, Checksum } from "Core";
 
 const CMD_REF = "-"; // What used to append other commands
 const CHAT = {
@@ -96,7 +96,7 @@ function saveNormal() {
 	}
 }
 
-addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
+function onInit(){
 	saveTrg[0] = new Trigger();
 	saveTrg[1] = new Trigger();
 	loadTrg[0] = new Trigger();
@@ -110,4 +110,13 @@ addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
 	}
 
 	saveTrg[0].addAction(saveNormal);
+}
+
+addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
+	try {
+		onInit();
+	} catch (e) {
+		print("Error during initialization of SaveLoad Trigger");
+		print(e);
+	}
 });
