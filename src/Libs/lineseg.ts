@@ -1,6 +1,20 @@
-import { Group, Rectangle, Widget, Destructable, Item } from "w3ts";
-const r = new Rectangle(0, 0, 0, 0);
-const g = new Group();
+import { Group, Rectangle, Widget, Destructable, Item, addScriptHook, W3TS_HOOK } from "w3ts";
+
+let r: Rectangle;
+let g: Group;
+
+function onInit(){
+	r = new Rectangle(0, 0, 0, 0);
+	g = new Group();
+}
+
+addScriptHook(W3TS_HOOK.MAIN_BEFORE, ()=>{
+	try {
+		onInit();
+	} catch (e) {
+		print("Error during initialization of LineSegment: " + e);
+	}
+})
 
 let ox: number;
 let oy: number;

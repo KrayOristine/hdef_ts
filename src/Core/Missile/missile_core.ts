@@ -1,5 +1,5 @@
 import { Pool } from "pool";
-import { Timer, Group, Unit, MapPlayer, Destructable, Item, Rectangle } from "w3ts";
+import { Timer, Group, Unit, MapPlayer, Destructable, Item, Rectangle, addScriptHook, W3TS_HOOK } from "w3ts";
 import { Coords } from "coords";
 import { MissileEffect } from "effect";
 import { LocGetZ, WorldBounds } from "Utils";
@@ -11,21 +11,36 @@ const REFRESH_RATE = 1 / 40;
 const SWEET_SPOT = 300;
 const UNIT_COLLISION = 128.0;
 const ITEM_COLLISION = 16.0;
-const r = new Rectangle(0, 0, 0, 0);
-const tmr = new Timer();
-const g = new Group();
+let r: Rectangle, tmr: Timer, g: Group;
+let mapCliff: number;
 let id = -1,
 	pid = -1,
 	dilation = 1,
 	index = 1;
-let last: number, yaw: number, pitch: number, travelled: number;
-let arr: WeakMap<OzMissile, WeakMap<Unit | OzMissile | Destructable | Item, boolean>> = new WeakMap(),
-	keys = [];
-let missile: OzMissile[] = [];
-let frozen: OzMissile[] = [];
-let count = 0;
-let list: OzMissile[] = [];
-const mapCliff = GetTerrainCliffLevel(WorldBounds.maxX, WorldBounds.maxY);
+	let last: number, yaw: number, pitch: number, travelled: number;
+	let arr: WeakMap<OzMissile, WeakMap<Unit | OzMissile | Destructable | Item, boolean>> = new WeakMap(),
+		keys = [];
+	let missile: OzMissile[] = [];
+	let frozen: OzMissile[] = [];
+	let count = 0;
+	let list: OzMissile[] = [];
+
+function onInit(){
+	r = new Rectangle(0, 0, 0, 0);
+	tmr = new Timer();
+	g = new Group();
+	mapCliff = GetTerrainCliffLevel(WorldBounds.maxX, WorldBounds.maxY);
+}
+
+addScriptHook(W3TS_HOOK.MAIN_BEFORE, ()=>{
+	try {
+		onInit();
+	} catch (e) {
+		DisplayTimedTextToPlayer(Player(0), 0, 0, 120,"Error during initialization of OzMissile");
+		DisplayTimedTextToPlayer(Player(0), 0, 0, 120,e);
+	}
+})
+
 export class OzMissile {
 	public prevX: number;
 	public prevY: number;

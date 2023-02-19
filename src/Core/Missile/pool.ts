@@ -52,7 +52,7 @@ addScriptHook(W3TS_HOOK.MAIN_AFTER, ()=>{
 	try {
 		onInit();
 	} catch(e){
-		print("Error during initialization of Unit Pool");
-		print(e);
+		DisplayTimedTextToPlayer(Player(0), 0, 0, 120,"Error during initialization of Unit Pool");
+		DisplayTimedTextToPlayer(Player(0), 0, 0, 120,e);
 	}
 });

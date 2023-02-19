@@ -8,11 +8,14 @@ import { W3TS_HOOK, addScriptHook, Unit, Trigger, Timer, tsGlobals } from "w3ts"
  */
 
 const CHECK_PERIOD = 0.02; // The lower the period, the smoother the movement seem but create more lags
-const orderMove = new Trigger();
-const otherOrder = new Trigger();
+let orderMove: Trigger;
+let otherOrder: Trigger;
 const unitList: WeakMap<Unit, MSX> = new WeakMap<Unit, MSX>();
 
 const init = ()=>{
+	orderMove = new Trigger();
+	otherOrder = new Trigger();
+
 	for (let i = 0; i < bj_MAX_PLAYERS; i++) {
 		orderMove.registerPlayerUnitEvent(tsGlobals.Players[i], EVENT_PLAYER_UNIT_ISSUED_POINT_ORDER, null);
 		orderMove.registerPlayerUnitEvent(tsGlobals.Players[i], EVENT_PLAYER_UNIT_ISSUED_TARGET_ORDER, null);
@@ -44,8 +47,8 @@ addScriptHook(W3TS_HOOK.MAIN_BEFORE, () => {
 	try {
 		init();
 	} catch (e) {
-		print("Error during initialization of Movement Speed X");
-		print(e);
+		DisplayTimedTextToPlayer(Player(0), 0, 0, 120, "Error during initialization of Movement Speed X");
+		DisplayTimedTextToPlayer(Player(0), 0, 0, 120,e);
 	}
 });
 

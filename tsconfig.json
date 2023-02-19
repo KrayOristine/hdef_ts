@@ -1,18 +1,24 @@
 {
   "compilerOptions": {
+    "strict": true,
     "baseUrl": "./src",
-    "allowJs": true,
-    "target": "es6",
+    "outDir": ".",
+    "allowJs": false,
+    "forceConsistentCasingInFileNames": true,
+    "target": "ESNext",
     "lib": [
-      "es6"
+      "ESNext"
     ],
     "moduleResolution": "classic",
+    "removeComments": true,
+    "alwaysStrict": true,
     "paths": {
       "*": [
         "../node_modules/*/src/index",
         "../node_modules/*/lib/index",
         "../node_modules/*/index",
         "../node_modules/*/dist/index",
+        "../node_modules/*/dist/cjs/index",
         "../node_modules/*",
         "./*/index",
         "./Core/*/index"
@@ -27,22 +33,18 @@
       }
     ],
     "types": [
-      "lua-types/core/index",
+      "node",
+      "@typescript-to-lua/language-extensions",
       "lua-types/core/coroutine",
       "lua-types/core/global",
       "lua-types/core/math",
-      "lua-types/core/metatable",
-      "lua-types/core/modules",
       "lua-types/core/string",
       "lua-types/core/table",
       "lua-types/core/os",
       "lua-types/special/5.3",
-      "war3-types/core/compat",
-      "war3-types/core/common",
-      "war3-types/core/blizzard",
-      "war3-types/core/commonai",
-      "war3-types/core/polyfill",
-      "war3-types/special/w3ts"
+      "war3-types-strict/1.33.0",
+      "war3-transformer/types",
+      "war3-objectdata/dist/cjs/objectdata"
     ]
   },
   "include": [
@@ -55,6 +57,8 @@
     "luaLibImport": "require",
     "noImplicitSelf": true,
     "luaBundle": "dist/tstl_output.lua",
-    "luaBundleEntry": "./src/main.ts"
+    "luaBundleEntry": "./src/main.ts",
+    "sourceMapTraceback": false,
+    "measurePerformance": true
   }
 }

@@ -1,5 +1,3 @@
-import { Unit } from "w3ts";
-
 let zeroLoc;
 let CachedFourCC: {[key: string]: number} = {};
 export function LocGetZ(atX: number, atY: number) {
@@ -7,12 +5,12 @@ export function LocGetZ(atX: number, atY: number) {
 	return GetLocationZ(zeroLoc);
 }
 
-export function SetUnitZ(whichUnit: Unit, newZ: number) {
-	whichUnit.setflyHeight(newZ - LocGetZ(whichUnit.x, whichUnit.y), 0);
+export function SetUnitZ(whichUnit: unit, newZ: number) {
+	SetUnitFlyHeight(whichUnit, newZ - LocGetZ(GetUnitX(whichUnit), GetUnitY(whichUnit)), 0);
 }
 
-export function UnitGetZ(whichUnit: Unit) {
-	return LocGetZ(whichUnit.x, whichUnit.y) + whichUnit.getflyHeight();
+export function UnitGetZ(whichUnit: unit) {
+	return LocGetZ(GetUnitX(whichUnit), GetUnitY(whichUnit)) + GetUnitFlyHeight(whichUnit);
 }
 
 export function FastCC(s: string): number {

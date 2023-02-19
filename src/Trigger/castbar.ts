@@ -1,7 +1,7 @@
 import { addScriptHook, W3TS_HOOK, Unit, Trigger, TextTag, Timer } from "w3ts";
 import { Players } from "w3ts/globals";
-import { Ability } from "Datastruct/Ability";
-import { registerPlayerUnitEvent } from "Libs/regPlayerUnitEvent";
+import { Ability } from "Datastruct";
+import { registerPlayerUnitEvent } from "Libs";
 import { Orders } from "wc3-treelib";
 
 const ct = "||||||||||||||||||||";
