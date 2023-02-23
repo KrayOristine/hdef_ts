@@ -18,3 +18,23 @@ export class TextEncoder {
 		return true;
 	}
 }
+
+export class Uint32Array {
+	private size: number;
+	public get length(): number { return this.size; }
+	constructor (length: number) {
+		this.size = length;
+	}
+}
+
+export function ArrayFill<T>(arr: T[], value: T, startIndex: number, endIndex?: number): T[]{
+	endIndex = endIndex || arr.length;
+	for (const i of $range(startIndex, endIndex)){
+		arr[i] = value;
+	}
+	return arr;
+}
+
+export function ArrayNew<T>(width: number, defaultValue: T): T[]{
+	return ArrayFill<T>([], defaultValue, 0, width);
+}

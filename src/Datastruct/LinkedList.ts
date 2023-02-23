@@ -1,7 +1,15 @@
 import { Quick } from "wc3-treelib";
+import { loopList }  from "LinkedListLua";
+
+/*
+ * Ozzzzymaniac Introduce you a holy List
+ * This is a linked list that have implemented useful feature like loop and more
+ * Be warned that it only able to run in TSTL context
+ */
+
 export class ListNode<T> {
     private _head?: LinkedList<T>; // null value meaning that this node is no longer references to any list
-    private _value?: T; // Data value
+    private _value: T; // Data value
     public next?: ListNode<T>;
     public prev?: ListNode<T>;
 
@@ -14,18 +22,30 @@ export class ListNode<T> {
     }
 
     public addAfter(data: T): ListNode<T> {
-        if (this._head == null) error("[LinkedList]: Given node is not belong to any LinkedList!");
+        if (this._head == null) error("[LinkedList] - The ListNode can't add data if it don't belong to any LinkedList");
 
         return this._head.addAfter(data, this);
     }
 
     public addAfterEx(node: ListNode<T>): ListNode<T> {
-        if (this._head == null) error("[LinkedList]: Given node is not belong to any LinkedList!");
+        if (this._head == null) error("[LinkedList] - The ListNode can't add another node if it don't belong to any LinkedList!");
 
         return this._head.addAfterEx(node, this);
     }
 
-    public remove(): ListNode<T> {
+    public addBefore(data: T): ListNode<T> {
+        if (this._head == null) error("[LinkedList] - The ListNode can't add data if it don't belong to any LinkedList");
+
+        return this._head.addBefore(data, this);
+    }
+
+    public addBeforeEx(node: ListNode<T>): ListNode<T> {
+        if (this._head == null) error("[LinkedList] - The ListNode can't add another node if it don't belong to any LinkedList!");
+
+        return this._head.addBeforeEx(node, this);
+    }
+
+    public remove() {
         if (!this._head) error("[LinkedList]: Given node is not belong to any LinkedList");
         if (this.next) this.next.prev = this.prev;
         if (this.prev) this.prev.next = this.next;
@@ -37,20 +57,25 @@ export class ListNode<T> {
         this._head.count -= 1;
         this.recycle();
 
-        return this;
+        return this.value;
     }
 
     // Recycling
-    private static _recycleStash: ListNode<any>[]=[];
+    private static _recycleStash: LuaTable<number,ListNode<any>> = new LuaTable;
 
     public static create<T>(head: LinkedList<T>, data: T): ListNode<T> {
-        if (this._recycleStash.length > 0) return this._recycleStash.pop()!.update(head, data);
+        let stashLength = this._recycleStash.length();
+        if (stashLength > 0) {
+            let v = this._recycleStash.get(stashLength);
+            this._recycleStash.delete(stashLength);
+            return v!.update(head, data);
+        }
 
         return new ListNode(head, data);
     }
 
     public static recycle(node: ListNode<any>){
-        if (!Quick.Contains(this._recycleStash, node)) Quick.Push(this._recycleStash, node);
+        if (!this._recycleStash) Quick.Push(this._recycleStash, node);
     }
 
     public recycle(): this {
@@ -64,6 +89,12 @@ export class ListNode<T> {
         return this;
     }
 
+    public loop(finish?: ListNode<T> ,backward: boolean = false): LuaIterable<ListNode<T>|undefined> | undefined {
+        if (!this._head) error("[LinkedList] - The ListNode does not have a head to begin loop")
+        if (this._head.count == 0) return;
+
+        return this._head.loop(this, finish, backward);
+    }
 }
 
 export class LinkedList<T> {
@@ -178,7 +209,7 @@ export class LinkedList<T> {
      * Don't use this!, this is a O(n) complexity method to remove a node
      * You can simply remove the node because it way faster than using this!
      */
-    public remove(data: T): ListNode<T>|null {
+    public remove(data: T): T | null {
         let node = this.first;
         while (node != null){
             if (node.value == data) return node.remove();
@@ -186,5 +217,11 @@ export class LinkedList<T> {
             node = node.next;
         }
         return null;
+    }
+
+    // Below available on TSTL in latest version
+    public loop(start: ListNode<T>, finish?: ListNode<T>, backward: boolean = false): LuaIterable<ListNode<T>|undefined>|undefined {
+        if (this.count == 0) return;
+        return loopList(start, finish, backward);
     }
 }

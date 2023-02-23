@@ -11,7 +11,6 @@
     ],
     "moduleResolution": "classic",
     "removeComments": true,
-    "alwaysStrict": true,
     "paths": {
       "*": [
         "../node_modules/*/src/index",
@@ -59,6 +58,7 @@
     "luaBundle": "dist/tstl_output.lua",
     "luaBundleEntry": "./src/main.ts",
     "sourceMapTraceback": false,
-    "measurePerformance": true
+    "measurePerformance": true,
+    "tstlVerbose": true
   }
 }

@@ -10,10 +10,12 @@ declare function BlzQueueNeutralImmediateOrderById   (forWhichPlayer: player, ne
 declare function BlzQueueNeutralPointOrderById       (forWhichPlayer: player, neutralStructure: number, unitId: number, x: number, y: number ): boolean;
 declare function BlzQueueNeutralTargetOrderById      (forWhichPlayer: player, neutralStructure: number, unitId: number, target: widget ): boolean;
 
+declare type Func<TResult> = (...args: unknown[]) => TResult;
+
 // Hidden natives
 
-export const _GV: any;
-export const globals: any;
+declare const _GV: LuaUserdata;
+declare const globals: LuaUserdata;
 
 /**
  *
