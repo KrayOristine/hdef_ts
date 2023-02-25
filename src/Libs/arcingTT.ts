@@ -1,5 +1,3 @@
-import { TextTag, Timer, Unit, MapPlayer } from "w3ts";
-
 const SIZE_MIN = 0.018; // Minimum size of text
 const SIZE_BONUS = 0.012; // Text size increase
 const TIME_LIFE = 1.0; // How long the text lasts
@@ -15,53 +13,49 @@ export class ArcTT {
 		return this._lastCreated;
 	}
 
-	private tmr: Timer;
+	private tmr: timer;
 
-	constructor() {
-		this.tmr = new Timer();
+	constructor(str: string, u: unit, x: number, y: number, duration: number, size: number, p: player) {
+		this.tmr = CreateTimer();
+		this.createEx(str, u, x, y, duration, size, p);
 	}
 
-	destroy() {
-		this.tmr.pause();
-		this.tmr.destroy();
-	}
-
-	createEx(str: string, u: Unit, x: number, y: number, duration: number, size: number, p: MapPlayer) {
+	createEx(str: string, u: unit, x: number, y: number, duration: number, size: number, p: player) {
 		let a = ANGLE_RND ? GetRandomReal(0, 2 * bj_PI) : ANGLE;
 		let timeScale = Math.max(duration, 0.001);
 		let t = TIME_LIFE * timeScale;
 		let as = Math.sin(a) * VELOCITY;
 		let ac = Math.cos(a) * VELOCITY;
-		let tt: TextTag;
-		if (u.isVisible(p)) {
-			tt = new TextTag();
-			tt.setPermanent(false);
-			tt.setLifespan(t);
-			tt.setFadepoint(TIME_FADE * timeScale);
-			tt.setText(str, SIZE_MIN * size);
-			tt.setPos(x, y, Z_OFFSET);
+		let tt = CreateTextTag() as texttag;
+		if (IsUnitVisible(u, p)) {
+			SetTextTagPermanent(tt, false);
+			SetTextTagLifespan(tt, t);
+			SetTextTagFadepoint(tt, TIME_FADE * timeScale);
+			SetTextTagText(tt, str, SIZE_MIN * size);
+			SetTextTagPos(tt, x, y, Z_OFFSET);
 		}
 
 		let pass = 0;
-		this.tmr.start(0.03125, true, () => {
+		TimerStart(this.tmr, 0.03125, true, () => {
 			pass += 0.03125;
 			if (!tt) return;
 			if (pass >= t) {
-				this.destroy();
+				PauseTimer(this.tmr);
+				DestroyTimer(this.tmr);
 				return;
 			}
 			let point = Math.sin(bj_PI * ((t - pass) / timeScale));
 			x += ac;
 			y += as;
-			tt.setPos(x, y, Z_OFFSET + Z_OFFSET_BON * point);
-			tt.setText(str, (SIZE_MIN + SIZE_BONUS * point) * size);
+			SetTextTagPos(tt, x, y, Z_OFFSET + Z_OFFSET_BON * point);
+			SetTextTagText(tt, str, (SIZE_MIN + SIZE_BONUS * point) * size);
 		});
 
 		ArcTT._lastCreated = this;
 		return tt;
 	}
 
-	create(str: string, u: Unit, duration: number, size: number) {
-		return this.createEx(str, u, u.x, u.y, duration, size, MapPlayer.fromLocal());
+	create(str: string, u: unit, duration: number, size: number) {
+		return this.createEx(str, u, GetUnitX(u), GetUnitY(u), duration, size, GetLocalPlayer());
 	}
 }

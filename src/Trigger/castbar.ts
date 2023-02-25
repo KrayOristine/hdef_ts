@@ -1,6 +1,4 @@
-import { addScriptHook, W3TS_HOOK, Unit, Trigger, TextTag, Timer } from "w3ts";
-import { Players } from "w3ts/globals";
-import { Ability } from "Datastruct";
+import { addScriptHook, W3TS_HOOK } from "w3ts";
 import { registerPlayerUnitEvent } from "Libs";
 import { Orders } from "wc3-treelib";
 

@@ -6,12 +6,15 @@ import { addScriptHook, W3TS_HOOK } from "w3ts"; // Hook for native war3 initial
 // Declare used variables
 const _mmTb: LuaTable = new LuaTable;
 let zeroLoc: location;
-let safeFilter: boolexpr;
+
+export let safeFilter: boolexpr;
+export let safeCondition: boolexpr;
 
 // Delay war3 object creation or else the maps is unplayable
 addScriptHook(W3TS_HOOK.MAIN_AFTER, ()=>{
 	zeroLoc = Location(0,0);
 	safeFilter = Filter(function(){return true})
+	safeCondition = Condition(function(){return true});
 })
 
 
@@ -21,6 +24,10 @@ export function LuaTableContains<T>(table: LuaTable, data: T): boolean {
 		if (table.get(i) == data) return true;
 	}
 	return false
+}
+
+export function EXLuaTableContains<T extends AnyNotNil>(table: LuaTable<T,any>, key: T): boolean {
+	return table.get(key) != null;
 }
 
 /**
@@ -34,7 +41,7 @@ export function LuaTableContains<T>(table: LuaTable, data: T): boolean {
  * @return 32-bit positive integer hash
  */
 export function Hash_MurMur2(data: string, seed: number): number {
-	if (_mmTb.get(data+seed)) return _mmTb.get(data+seed);
+	if (_mmTb.get(data+seed) != null) return _mmTb.get(data+seed);
 	let str = TextEncoder.encode(data),
 		l = str.length,
 		h = seed ^ l,
@@ -69,8 +76,9 @@ export function Hash_MurMur2(data: string, seed: number): number {
 	h ^= h >>> 13;
 	h = (h & 0xffff) * 0x5bd1e995 + ((((h >>> 16) * 0x5bd1e995) & 0xffff) << 16);
 	h ^= h >>> 15;
-
-	return h >>> 0;
+	h = h >>> 0
+	_mmTb.set(data+seed, h);
+	return h;
 }
 
 /**
@@ -84,7 +92,7 @@ export function Hash_MurMur2(data: string, seed: number): number {
  * @return 32-bit positive integer hash
  */
 export function Hash_MurMur3(data: string, seed: number): number {
-	if (_mmTb.get(data+seed)) return _mmTb.get(data+seed);
+	if (_mmTb.get(data+seed) != null) return _mmTb.get(data+seed);
 
 	let key = TextEncoder.encode(data);
 	let remainder: number, bytes: number, h1: number, h1b: number, c1: number, c2: number, k1: number, i: number;
@@ -135,8 +143,9 @@ export function Hash_MurMur3(data: string, seed: number): number {
 	h1 ^= h1 >>> 13;
 	h1 = ((h1 & 0xffff) * 0xc2b2ae35 + ((((h1 >>> 16) * 0xc2b2ae35) & 0xffff) << 16)) & 0xffffffff;
 	h1 ^= h1 >>> 16;
-
-	return h1 >>> 0;
+	h1 = h1 >>> 0;
+	_mmTb.set(data + seed, h1);
+	return h1;
 }
 
 export function EXStringHash(str: string): string {
@@ -178,14 +187,12 @@ export function EXGroupEnumUnitInRect(g: group, r: rect, filter?: boolexpr){
 	filter ??= safeFilter;
 
 	GroupEnumUnitsInRect(g, r, filter);
-	DestroyBoolExpr(filter);
 }
 
 export function EXGroupEnumUnitInRange(g: group, x: number, y: number, radius: number, filter?: boolexpr){
 	filter ??= safeFilter;
 
 	GroupEnumUnitsInRange(g, x, y, radius, filter);
-	DestroyBoolExpr(filter);
 }
 
 export function EXGroupEnumUnitInRangeOfLoc(g: group, l: location, radius: number, filter?: boolexpr, wantDestroy: boolean = false){
@@ -195,19 +202,16 @@ export function EXGroupEnumUnitInRangeOfLoc(g: group, l: location, radius: numbe
 
 	GroupEnumUnitsInRange(g, x, y, radius, filter);
 	if (wantDestroy) RemoveLocation(l);
-	DestroyBoolExpr(filter);
 }
 
 export function EXGroupEnumUnitOfPlayer(g: group, p: player, filter?: boolexpr){
 	filter ??= safeFilter;
 
 	GroupEnumUnitsOfPlayer(g, p, filter);
-	DestroyBoolExpr(filter);
 }
 
 export function EXGroupEnumUnitSelected(g: group, p: player, filter?: boolexpr){
 	filter ??= safeFilter;
 
 	GroupEnumUnitsSelected(g, p, filter);
-	DestroyBoolExpr(filter);
 }
