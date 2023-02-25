@@ -4,6 +4,7 @@
  A warcraft defense maps that made by using typescript and powered by **TSTL**
 
  This is a custom version that I (Ozzzzymaniac or in short Ori) made by modify the original framework template codes
+ that made by Cipherxof (trigger)
  
  [This work](https://github.com/KrayOristine/hdef_ts) © 2023 by [Kray Oristine](https://github.com/KrayOristine) is licensed under  [Attribution-NonCommercial-ShareAlike 4.0 International](http://creativecommons.org/licenses/by-nc-sa/4.0/?ref=chooser-v1)
 
@@ -20,4 +21,4 @@ Shield: [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
 
 ## Original Template
 
-[Warcraft3 TS Template](https://github.com/cipherxof/wc3-ts-template) - by [Cipherxof](https://github.com/cipherxof)
+[Warcraft3 TS Template](https://github.com/cipherxof/wc3-ts-template) - by [Cipherxof (trigger)](https://github.com/cipherxof)
