@@ -20,4 +20,4 @@ Shield: [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
 
 ## Original Template
 
-[Warcraft3 TS Template](https://github.com/cipherxof/wc3-ts-template)
+[Warcraft3 TS Template](https://github.com/cipherxof/wc3-ts-template) - by [Cipherxof](https://github.com/cipherxof)
