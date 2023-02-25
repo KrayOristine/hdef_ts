@@ -5,7 +5,7 @@
 
  This is a custom version that I (Ozzzzymaniac or in short Ori) made by modify the original framework template codes
  
- [This work](https://github.com/KrayOristine/hdef_ts) © 2023 by [Kray Oristine](https://github.com/KrayOristine) is licensed under  [Attribution-NonCommercial-ShareAlike 4.0 International  ![](https://chooser-beta.creativecommons.org/img/cc-logo.f0ab4ebe.svg)![](https://chooser-beta.creativecommons.org/img/cc-by.21b728bb.svg)](http://creativecommons.org/licenses/by-nc-sa/4.0/?ref=chooser-v1)
+ [This work](https://github.com/KrayOristine/hdef_ts) © 2023 by [Kray Oristine](https://github.com/KrayOristine) is licensed under  [Attribution-NonCommercial-ShareAlike 4.0 International![]](http://creativecommons.org/licenses/by-nc-sa/4.0/?ref=chooser-v1)
 
 
 
