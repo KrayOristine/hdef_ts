@@ -15,7 +15,6 @@ function colorizeDamages(amt: number,  attack: boolean, flags: boolean[]): [stri
 	return ["|c00E45AAA" + amt, 1]; // Some how it passed all filter, let indicate it a 'error damage'
 }
 
-let etrig: trigger;
 const enabled: boolean[] = [];
 function __etrig_action() {
 	let p = GetTriggerPlayer() as player;
@@ -31,14 +30,14 @@ function __etrig_action() {
 
 function __onDamage() {
 	let d = Damage.current;
-	let p = GetOwningPlayer(d.source);
-	if (!enabled[GetPlayerId(p)]) return;
+	if (!enabled[GetPlayerId(GetOwningPlayer(d.source))]) return;
+
 	const [text, size] = colorizeDamages(d.damage, d.isAttack, d.flags);
-	new ArcTT(text, d.target, GetUnitX(d.target), GetUnitY(d.target), 2, size, p);
+	new ArcTT(text, d.target, GetUnitX(d.target), GetUnitY(d.target), 2, size, GetLocalPlayer());
 }
 
 addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
-	etrig = CreateTrigger();
+	let etrig = CreateTrigger();
 	for (const i of $range(0, bj_MAX_PLAYERS)){
 		TriggerRegisterPlayerChatEvent(etrig, Player(i) as player, "-dmg", false);
 	}

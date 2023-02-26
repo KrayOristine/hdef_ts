@@ -146,7 +146,6 @@ export function compileMap(config: IProjectConfig) {
       logger.info(`Minifying script...`);
       contents = luamin.minify(contents.toString());
     }
-    //contents = luamin.minify(contents);
     fs.writeFileSync(mapLua, contents);
   } catch (err) {
     logger.error(err.toString());
@@ -159,12 +158,12 @@ export function compileMap(config: IProjectConfig) {
 /**
  * Formatter for log messages.
  */
-// const loggerFormatFunc = printf(({ level, message, timestamp }) => {
-//   return `[${timestamp.replace("T", " ").split(".")[0]}] ${level}: ${message}`;
-// });
-const loggerFormatFunc = printf(({ level, message }) => {
-  return `[${timestamp()}] ${level}: ${message}`;
+const loggerFormatFunc = printf(({ level, message, timestamp }) => {
+  return `[${timestamp.replace("T", " ").split(".")[0]}] ${level}: ${message}`;
 });
+// const loggerFormatFunc = printf(({ level, message }) => {
+//   return `[${timestamp()}] ${level}: ${message}`;
+// });
 
 /**
  * The logger object.

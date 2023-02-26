@@ -17,17 +17,12 @@ addScriptHook(W3TS_HOOK.MAIN_AFTER, ()=>{
 	safeCondition = Condition(function(){return true});
 })
 
-
 // Utility for LuaTable
-export function LuaTableContains<T>(table: LuaTable, data: T): boolean {
+export function LuaTableContains<T2>(table: LuaTable<number,T2>, data: T2): boolean {
 	for (const i of $range(1, table.length())){
 		if (table.get(i) == data) return true;
 	}
 	return false
-}
-
-export function EXLuaTableContains<T extends AnyNotNil>(table: LuaTable<T,any>, key: T): boolean {
-	return table.get(key) != null;
 }
 
 /**

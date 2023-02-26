@@ -61,21 +61,16 @@ export class ListNode<T> {
     }
 
     // Recycling
-    private static _recycleStash: LuaTable<number,ListNode<any>> = new LuaTable;
+    private static _recycleStash: ListNode<any>[] = []; //LuaTable<number,ListNode<any>> = new LuaTable;
 
     public static create<T>(head: LinkedList<T>, data: T): ListNode<T> {
-        let stashLength = this._recycleStash.length();
-        if (stashLength > 0) {
-            let v = this._recycleStash.get(stashLength);
-            this._recycleStash.delete(stashLength);
-            return v!.update(head, data);
-        }
+      if (this._recycleStash.length > 0) return this._recycleStash.pop()!.update(head, data);
 
-        return new ListNode(head, data);
+      return new ListNode(head, data);
     }
 
     public static recycle(node: ListNode<any>){
-        if (!this._recycleStash) Quick.Push(this._recycleStash, node);
+        if (!Quick.Contains(this._recycleStash, node)) this._recycleStash.push(node);
     }
 
     public recycle(): this {
