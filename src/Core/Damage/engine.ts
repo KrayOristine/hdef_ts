@@ -315,7 +315,7 @@ function finish() {
 			} while (i < ex);
 		} while (i < recursiveStacks.length);
 
-		for (i = 0; i < recursiveStacks.length; i++) {
+		for (const i of $range(0, recursiveStacks.length)) {
 			let rs = recursiveStacks[i].recursive;
 			if (rs == null) continue;
 
