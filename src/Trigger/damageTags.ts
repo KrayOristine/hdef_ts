@@ -4,9 +4,9 @@ import { W3TS_HOOK, addScriptHook } from "w3ts";
 
 
 
-function colorizeDamages(amt: number,  attack: boolean, flags: boolean[]): [string,number] {
+function colorizeDamages(amt: number,  attack: boolean, flags: boolean[]): [string, number] {
 	if (amt < 0.0 || flags[DamageType.Heal]) return ["|c0096FF96+ " + amt, 1]; // green
-	if (flags[DamageType.Pure]) return ["|c00FFFFFF" + amt, 1]; // white
+	if (flags[DamageType.Pure] || flags[DamageType.RAW]) return ["|c00FFFFFF" + amt, 1]; // white
 	if (flags[DamageType.Evasion]) return ["MISSED!", 1];
 	if (flags[DamageType.Critical]) return ["|c00FF0000" + amt + "!", 2]; // red
 	if (flags[DamageType.Physical] || attack) return ["|c00FF7F00" + amt, 1]; // orange

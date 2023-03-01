@@ -92,11 +92,8 @@ typings/
 .dynamodb/
 
 # Personal ignore
-Luafuck.exe
-Luafuck.pdb
 *.code-workspace
 maps/
-map_packed/
-map_image/
-src/Test
 dts
+compileScripts/
+resources/

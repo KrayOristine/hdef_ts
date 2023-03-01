@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "strict": true,
+    "noUncheckedIndexedAccess": false,
     "baseUrl": "./src",
     "outDir": ".",
     "allowJs": false,
@@ -19,8 +20,7 @@
         "../node_modules/*/dist/index",
         "../node_modules/*/dist/cjs/index",
         "../node_modules/*",
-        "./*/index",
-        "./Core/*/index"
+        "./*/index"
       ]
     },
     "plugins": [
