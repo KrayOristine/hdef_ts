@@ -6,6 +6,7 @@
     "license": "GPL-3.0",
     "main": "src/main.ts",
     "scripts": {
+        "preinstall": "npx only-allow pnpm",
         "test": "ts-node --transpile-only scripts/test.ts",
         "build": "ts-node --transpile-only scripts/build.ts",
         "dev": "npm-watch",
