@@ -17,6 +17,9 @@ declare type Func3<T1,T2,T3,TResult> = (p1: T1, p2: T2, p3: T3) => TResult;
 declare type Func4<T1,T2,T3,T4,TResult> = (p1: T1, p2: T2, p3: T3, p4: T4) => TResult;
 declare type Func5<T1,T2,T3,T4,T5,TResult> = (p1: T1, p2: T2, p3: T3, p4: T4, p5: T5) => TResult;
 declare type ObjValues<T> = T[keyof T];
+declare type Nullable<T> = T | null;
+declare type Undefinable<T> = T | undefined;
+declare type MayNotExist<T> = T | null | undefined;
 
 // Hidden natives
 
@@ -193,4 +196,4 @@ declare function BlzGetUnitMovementType(whichUnit: unit): movetypeid ;
  * @param whichUnit unit
  * @param movetypeId movetypeId
 */
-declare function BlzSetUnitMovementType(whichUnit: unit, movetypeId: 0|1|2|4|8|16|32|64): void ;
+declare function BlzSetUnitMovementType(whichUnit: unit, movetypeId: movetypeid): void ;

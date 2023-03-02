@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
     "strict": true,
-    "noUncheckedIndexedAccess": false,
+    "alwaysStrict": false,
+    "sourceMap": false,
     "baseUrl": "./src",
-    "outDir": ".",
+    "outDir": "./build",
     "allowJs": false,
     "forceConsistentCasingInFileNames": true,
     "target": "ESNext",
@@ -20,10 +21,18 @@
         "../node_modules/*/dist/index",
         "../node_modules/*/dist/cjs/index",
         "../node_modules/*",
-        "./*/index"
+        "../node_modules/.pnpm/*/src/index",
+        "../node_modules/.pnpm/*/lib/index",
+        "../node_modules/.pnpm/*/index",
+        "../node_modules/.pnpm/*/dist/index",
+        "../node_modules/.pnpm/*/dist/cjs/index",
+        "../node_modules/.pnpm/*"
       ]
     },
     "plugins": [
+      {
+        "transform": "./compileScripts/plugins/pre-compute"
+      },
       {
         "transform": "war3-transformer",
         "mapDir": "C:/Users/ADMIN/Documents/Warcraft III/Maps/hdef_ts/maps/map.w3x",
