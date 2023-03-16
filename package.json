@@ -30,7 +30,7 @@
         "@typescript-to-lua/language-extensions": "^1.0.0",
         "eslint": "^8.35.0",
         "eslint-plugin-import": "^2.27.5",
-        "fs-extra": "8.1.0",
+        "fs-extra": "11.1.0",
         "lua-types": "^2.13.1",
         "luamin": "1.0.4",
         "mdx-m3-viewer": "^5.12.0",
