@@ -35,7 +35,7 @@
         "luamin": "1.0.4",
         "mdx-m3-viewer": "^5.12.0",
         "ts-node": "^10.9.1",
-        "tsconfig-paths": "3.9.0",
+        "tsconfig-paths": "4.1.2",
         "tsutils": "3.21.0",
         "typescript": "^4.9.5",
         "typescript-to-lua": "^1.13.2",
