@@ -1,7 +1,33 @@
 {
-    "mapFolder": "map.w3x",
-    "minifyScript": false,
-    "gameExecutable": "C:\\Games\\wc3\\Warcraft III\\_retail_\\x86_64\\Warcraft III.exe",
-    "outputFolder": "./dist/bin",
-    "launchArgs": ["-launch", "-windowmode windowed", "-nowfpause"]
+    "compilerOptions": {
+        "baseUrl": "./maps/unpacked/map.w3x",
+        "outDir": ".",
+
+        "scripts": {
+            "minify": false,
+            "optimize": false,
+            "encrypt": {
+                "enable": false,
+
+                "key": "",
+                "salt": ""
+            }
+        },
+
+        "protection": {
+            "removeEditorOnly": false,
+            "scrambleHeader": false,
+            "obfuscateScripts": false,
+            "obfuscateFileName": false,
+            "obfuscateObjectId": false,
+            "fakeScripts": false,
+            "scrambleFile": false,
+            "scrambleRepeat": 1
+        }
+    },
+
+    "game": {
+        "executable": "C:\\Games\\wc3\\Warcraft III\\_retail_\\x86_64\\Warcraft III.exe",
+        "args": ["-launch", "-windowmode windowed", "-nowfpause", "-graphicsapi Direct3D9"]
+    }
 }

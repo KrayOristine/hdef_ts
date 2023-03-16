@@ -1,6 +1,5 @@
-import { W3TS_HOOK, addScriptHook } from "w3ts";
-import { LinkedList, ListNode } from "../shared/LinkedList";
-import { ArrayNew } from "../shared/jsNative";
+import * as ll from "../shared/LinkedList";
+import * as js from "../shared/jsNative";
 
 /*
  * Introducing to you a ported version of Bribe Damage Engine on TS that have almost same functionality as the original one
@@ -9,8 +8,8 @@ import { ArrayNew } from "../shared/jsNative";
  * Original version in lua by Bribe
  * Ported to TS by Ozzzzymaniac (aka. TranTrungHo71)
  *
- * Version: 2.0 (Complete rewritten to fix bugs that cause by my useless brain)
- * This rewritten version is based on my Damage Engine that i ported to C#
+ * Version: 2.1
+ * Now please use `import * as Damage` to reduce local variable usage caused by tstl
  */
 
 const DEATH_VAL = 0.405; // Value which unit is determined as death
@@ -27,7 +26,7 @@ export const enum DamageType {
   Heal, // Is heal
   Shield, // Negated by shield
 
-  // System flags (Only as if you wantt to use them)
+  // System flags (Only as if you want to use them)
 
   Spell, // Came from abilities that not specify damage type by default
   Periodic, // Came from damage over times
@@ -38,7 +37,7 @@ export const enum DamageType {
   // Engine Flags (These are not intended to be modified)
 
   RAW, // Bypass all armor, crit, evasion, ignore damage reduction
-  INTERNAL // Ignore the engine, don't fire any event
+  INTERNAL, // Ignore the engine, don't fire any event
 }
 
 interface DamageInstance {
@@ -59,7 +58,7 @@ interface DamageInstance {
 }
 
 interface DamageTrigger {
-  func: DamageAction;
+  func: Func<void>;
   isFrozen: boolean;
   isInception: boolean;
   dreamDepth: number;
@@ -68,28 +67,25 @@ interface DamageTrigger {
   registerAt: number;
 }
 
-type DamageAction = Func<void>;
+// const DAMAGE_EVENT = {
+// DAMAGE: "damage", // Upon the damage first run
+// ARMOR: "armor", // Armor event run
+// DAMAGED: "damaged", // Damage almost applied
+// AFTER: "after", // After applied
+// SOURCE: "source", // For AOE event
+// LETHAL: "lethal", // As it name tell us
+// } as const;
+//
+// type DamageEvent = ObjValues<typeof DAMAGE_EVENT>;
 
-const DAMAGE_EVENT = {
-  DAMAGE: "damage", // Upon the damage first run
-  ARMOR: "armor", // Armor event run
-  DAMAGED: "damaged", // Damage almost applied
-  AFTER: "after", // After applied
-  SOURCE: "source", // For AOE event
-  LETHAL: "lethal" // As it name tell us
-} as const;
-
-type DamageEvent = ObjValues<typeof DAMAGE_EVENT>;
-//    ^?
-
-// const enum DamageEvent {
-//   DAMAGE, // Upon the damage first run
-//   ARMOR, // Armor event run
-//   DAMAGED, // Damage almost applied
-//   AFTER, // After applied
-//   SOURCE, // For AOE event
-//   LETHAL,
-// };
+export const enum DamageEvent {
+  DAMAGE, // Upon the damage first run
+  ARMOR, // Armor event run
+  DAMAGED, // Damage almost applied
+  AFTER, // After applied
+  SOURCE, // For AOE event
+  LETHAL, // as it name
+}
 
 let alarmSet = false,
   canKick = false,
@@ -102,42 +98,45 @@ let alarmSet = false,
   isLastInstance = false,
   prep = false,
   hasSource = false,
-  hasLethal = false;
-let sourceAOE = 1,
-  sourceStacks = 1,
-  sleepDepth = 0;
-
-let t1: trigger, t2: trigger, t3: trigger;
-let alarm: timer;
-let orgSource: unit | undefined, orgTarget: unit | undefined;
-
-let recursiveSource: LuaMap<unit, boolean> = new LuaMap(),
+  hasLethal = false,
+  sleepDepth = 0,
+  t1: trigger,
+  t2: trigger,
+  t3: trigger,
+  alarm: timer,
+  orgSource: unit | undefined,
+  orgTarget: unit | undefined,
+  recursiveSource: LuaMap<unit, boolean> = new LuaMap(),
   recursiveTarget: LuaMap<unit, boolean> = new LuaMap(),
-  targets: LuaMap<unit, boolean> = new LuaMap();
-let userIndex: DamageTrigger;
-
-let current: DamageInstance,
-  lastInstance: DamageInstance,
+  targets: LuaMap<unit, boolean> = new LuaMap(),
+  userIndex: DamageTrigger,
   recursiveStacks: DamageInstance[] = [];
 
-const internalSkip = () => current.flags[DamageType.INTERNAL];
-const breakCheck = {
-  "damage": () => current.flags[DamageType.Pure] || skipEngine || current.flags[DamageType.INTERNAL],
-  "armor": () => current.damage <= 0 || current.flags[DamageType.Pure] || current.flags[DamageType.INTERNAL],
-  "damaged": internalSkip,
-  "after": internalSkip,
-  "source": internalSkip,
-  "lethal": internalSkip,
-};
+export let nextType: DamageType; // The next value to apply if exist
+export let life = 0; // Should only use on lethal event
+export let sourceAOE = 1;
+export let sourceStacks = 1;
 
-const eventList = {
-  "damage": new LinkedList<DamageTrigger>(), // damage
-  "armor": new LinkedList<DamageTrigger>(), // armor
-  "damaged": new LinkedList<DamageTrigger>(), // damaged
-  "after": new LinkedList<DamageTrigger>(), // after
-  "source": new LinkedList<DamageTrigger>(), // source
-  "lethal": new LinkedList<DamageTrigger>(), // lethal
-};
+export let current: DamageInstance, lastInstance: DamageInstance;
+
+const internalSkip = () => current.flags[DamageType.INTERNAL];
+const breakCheck = [
+  () => current.flags[DamageType.Pure] || skipEngine || current.flags[DamageType.INTERNAL],
+  () => current.damage <= 0 || current.flags[DamageType.Pure] || current.flags[DamageType.INTERNAL],
+  internalSkip,
+  internalSkip,
+  internalSkip,
+  internalSkip,
+];
+
+const eventList = [
+  new ll.LinkedList<DamageTrigger>(), // damage
+  new ll.LinkedList<DamageTrigger>(), // armor
+  new ll.LinkedList<DamageTrigger>(), // damaged
+  new ll.LinkedList<DamageTrigger>(), // after
+  new ll.LinkedList<DamageTrigger>(), // source
+  new ll.LinkedList<DamageTrigger>(), // lethal
+];
 const attackImmune = [
   false, // ATTACK_TYPE_NORMAL
   true, // ATTACK_TYPE_MELEE
@@ -184,12 +183,12 @@ function runEvent(v: DamageEvent) {
   if (dreaming || !head || check() || head.first == null) return;
 
   let node = head.first;
-  Damage.enable(false);
+  enable(false);
   EnableTrigger(t3);
   dreaming = true;
 
   while (true) {
-    if (!userIndex.isFrozen || !hasSource || v != "source" || sourceAOE > userIndex.minAOE) {
+    if (!userIndex.isFrozen || !hasSource || v != DamageEvent.SOURCE || sourceAOE > userIndex.minAOE) {
       userIndex.func();
     }
     if (node.next == null || check()) break;
@@ -199,20 +198,14 @@ function runEvent(v: DamageEvent) {
   }
 
   dreaming = false;
-  Damage.enable(true);
+  enable(true);
   DisableTrigger(t3);
 }
 
-function create(
-  src: unit,
-  tgt: unit,
-  dmg: number,
-  iatk: boolean,
-  irgd: boolean,
-  tatk: attacktype,
-  tdmg: damagetype,
-  twpn?: weapontype
-) {
+function create(src: unit | undefined, tgt: unit | undefined, dmg: number, iatk: boolean, irgd: boolean, tatk: attacktype, tdmg: damagetype, twpn?: weapontype) {
+  if (src == undefined) error("What the fuck are you doing?, why the fuck the source is null?");
+  if (tgt == undefined) error("What the fuck are you doing?, why the fuck the target is null?");
+
   let d: DamageInstance = {
     source: src,
     target: tgt,
@@ -222,15 +215,15 @@ function create(
     weaponType: twpn,
     isAttack: iatk,
     isRanged: irgd,
-    flags: ArrayNew(DamageType.PET, false),
+    flags: js.ArrayNew(DamageType.PET, false),
     prevAmt: dmg,
     prevAttackType: tatk,
     prevDamageType: tdmg,
     prevWeaponType: twpn,
   };
-  if (Damage.nextType != 0) {
-    d.flags[Damage.nextType] = true;
-    Damage.nextType = 0;
+  if (nextType != 0) {
+    d.flags[nextType] = true;
+    nextType = 0;
   }
   d.flags[DamageType.Spell] = tatk == ATTACK_TYPE_NORMAL && !iatk;
   d.flags[DamageType.Physical] = iatk;
@@ -247,7 +240,7 @@ function addRecursive(d: DamageInstance) {
   if (!userIndex.isFrozen) {
     userIndex.isFrozen = true;
     return;
-  };
+  }
 
   if (!userIndex.isFrozen && userIndex.dreamDepth < sleepDepth) {
     userIndex.dreamDepth++;
@@ -256,7 +249,7 @@ function addRecursive(d: DamageInstance) {
 }
 
 function AOEEnd() {
-  runEvent(DAMAGE_EVENT.SOURCE);
+  runEvent(DamageEvent.SOURCE);
   sourceAOE = 1;
   sourceStacks = 1;
   orgSource = undefined;
@@ -266,7 +259,7 @@ function AOEEnd() {
 
 function afterDamage() {
   if (isCurrent) {
-    runEvent(DAMAGE_EVENT.AFTER);
+    runEvent(DamageEvent.AFTER);
     isCurrent = false;
   }
   skipEngine = false;
@@ -278,7 +271,7 @@ function doPreEvent(d: DamageInstance, isNatural: boolean) {
   recursiveTarget.set(d.target, true);
   if (d.damage == 0.0) return false;
   skipEngine = d.damageType == DAMAGE_TYPE_UNKNOWN || d.flags[DamageType.INTERNAL];
-  runEvent(DAMAGE_EVENT.DAMAGE);
+  runEvent(DamageEvent.DAMAGE);
   if (isNatural) {
     BlzSetEventAttackType(d.attackType);
     BlzSetEventDamageType(d.damageType);
@@ -300,18 +293,9 @@ function runRecursive(i: number, stack: DamageInstance[]) {
       DisableTrigger(t1);
       EnableTrigger(t2);
       totem = true;
-      UnitDamageTarget(
-        d.source,
-        d.target,
-        d.damage,
-        d.isAttack,
-        d.isRanged,
-        d.attackType,
-        d.damageType,
-        d.weaponType ?? WEAPON_TYPE_WHOKNOWS
-      );
+      UnitDamageTarget(d.source, d.target, d.damage, d.isAttack, d.isRanged, d.attackType, d.damageType, d.weaponType ?? WEAPON_TYPE_WHOKNOWS);
     } else {
-      runEvent(DAMAGE_EVENT.DAMAGED);
+      runEvent(DamageEvent.DAMAGED);
       if (d.damage < 0) SetWidgetLife(d.target, GetWidgetLife(d.target) - d.damage);
     }
     afterDamage();
@@ -348,7 +332,7 @@ function finish() {
   prep = false;
   kicking = false;
   dreaming = false;
-  Damage.enable(true);
+  enable(true);
   recursiveSource = new LuaMap();
   recursiveTarget = new LuaMap();
 }
@@ -357,30 +341,29 @@ function failsafeClear() {
   canKick = true;
   kicking = false;
   totem = false;
-  runEvent(DAMAGE_EVENT.DAMAGED);
+  runEvent(DamageEvent.DAMAGED);
   eventsRun = true;
   finish();
 }
 
 function createFromEvent() {
   return create(
-    //@ts-ignore
     GetEventDamageSource(),
     BlzGetEventDamageTarget(),
     GetEventDamage(),
     BlzGetEventIsAttack(),
     false,
-    BlzGetEventAttackType(),
-    BlzGetEventDamageType(),
+    BlzGetEventAttackType() as attacktype,
+    BlzGetEventDamageType() as damagetype,
     BlzGetEventWeaponType()
   );
 }
 
-// Why?, simple to reduce overhead on Lua Garbage Collection, creating this once and simply refer it pointer to other timer
+// Creating this seprately may slightly increase performance with timer
 function alarmExec() {
   alarmSet = false;
   dreaming = false;
-  Damage.enable(true);
+  enable(true);
   if (totem) failsafeClear();
   else {
     canKick = true;
@@ -427,11 +410,7 @@ function __trigger1_action() {
     finish();
   }
 
-  totem =
-    !isLastInstance ||
-    attackImmune[GetHandleId(d.attackType)] ||
-    damageImmune[GetHandleId(d.damageType)] ||
-    !IsUnitType(d.target, UNIT_TYPE_MAGIC_IMMUNE);
+  totem = !isLastInstance || attackImmune[GetHandleId(d.attackType)] || damageImmune[GetHandleId(d.damageType)] || !IsUnitType(d.target, UNIT_TYPE_MAGIC_IMMUNE);
 
   return false;
 }
@@ -453,17 +432,17 @@ function __trigger2_action(): boolean {
 
   d.damage = r;
   if (r > 0.0) {
-    runEvent(DAMAGE_EVENT.ARMOR);
+    runEvent(DamageEvent.ARMOR);
     if (hasLethal) {
-      Damage.life = GetWidgetLife(d.target) - d.damage;
-      if (Damage.life <= DEATH_VAL) {
-        runEvent(DAMAGE_EVENT.LETHAL);
-        d.damage = GetWidgetLife(d.target) - Damage.life;
+      life = GetWidgetLife(d.target) - d.damage;
+      if (life <= DEATH_VAL) {
+        runEvent(DamageEvent.LETHAL);
+        d.damage = GetWidgetLife(d.target) - life;
       }
     }
   }
 
-  if (d.damageType != DAMAGE_TYPE_UNKNOWN) runEvent(DAMAGE_EVENT.DAMAGED);
+  if (d.damageType != DAMAGE_TYPE_UNKNOWN) runEvent(DamageEvent.DAMAGED);
   BlzSetEventDamage(d.damage);
   eventsRun = true;
   if (d.damage == 0) finish();
@@ -478,14 +457,18 @@ function __trigger3_action(): boolean {
   return false;
 }
 
-addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
+/**
+ * DO NOT CALL THIS!
+ *
+ * @private This is intended to be called from initialization system
+ */
+export function Init() {
   alarm = CreateTimer();
   t1 = CreateTrigger();
   t2 = CreateTrigger();
   t3 = CreateTrigger();
   for (const i of $range(0, bj_MAX_PLAYERS)) {
-    const p = Player(i);
-    if (!p) continue;
+    const p = Player(i) as player;
     TriggerRegisterPlayerUnitEvent(t1, p, EVENT_PLAYER_UNIT_DAMAGING);
     TriggerRegisterPlayerUnitEvent(t2, p, EVENT_PLAYER_UNIT_DAMAGED);
     TriggerRegisterPlayerUnitEvent(t3, p, EVENT_PLAYER_UNIT_DAMAGING);
@@ -495,90 +478,86 @@ addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
   TriggerAddCondition(t2, Condition(__trigger2_action));
   TriggerAddCondition(t3, Condition(__trigger3_action));
   DisableTrigger(t3);
-});
+}
 
-export class Damage {
-  public static get current() {
-    return current;
-  } // The current execution damage context
-  public static nextType: DamageType; // The next value to apply if exist
-  public static life: number = 0; // Should only use on lethal event
+/**
+ * Register a new listener that will fired on specific event
+ * @param whichEvent
+ * @param priority - Lower number run first
+ * @param callback - A function take no arguments, return nothing
+ * @returns A event node
+ */
+export function register(whichEvent: DamageEvent, priority: number, callback: Func<void>) {
+  let head = eventList[whichEvent];
 
-  /**
-   * Register a new listener that will fired on specific event
-   * @param whichEvent
-   * @param priority - Lower number run first
-   * @param callback - A function take no arguments, return nothing
-   * @returns A event node
-   */
-  public static register(whichEvent: DamageEvent, priority: number, callback: DamageAction) {
-    let head = eventList[whichEvent];
+  hasLethal = hasLethal || whichEvent == DamageEvent.LETHAL;
+  hasSource = hasSource || whichEvent == DamageEvent.SOURCE;
 
-    hasLethal = hasLethal || whichEvent == DAMAGE_EVENT.LETHAL;
-    hasSource = hasSource || whichEvent == DAMAGE_EVENT.SOURCE;
+  const data: DamageTrigger = {
+    func: callback,
+    isFrozen: false,
+    isInception: false,
+    weight: priority,
+    dreamDepth: 0,
+    minAOE: 1,
+    registerAt: whichEvent,
+  };
 
-    const data: DamageTrigger = {
-      func: callback,
-      isFrozen: false,
-      isInception: false,
-      weight: priority,
-      dreamDepth: 0,
-      minAOE: 1,
-      registerAt: whichEvent.length,
-    };
+  let node = head.first;
+  if (node == null) return head.addFirst(data);
 
-    let node = head.first;
-    if (node == null) return head.addFirst(data);
+  while (true) {
+    if (node.value.weight > priority) return node.addBefore(data);
+    if (node.next == null) break;
 
-    while (true) {
-      if (node.value.weight > priority) return node.addBefore(data);
-      if (node.next == null) break;
-
-      node = node.next;
-    }
-
-    return node.addAfter(data);
+    node = node.next;
   }
 
-  public static remove(node: ListNode<DamageTrigger>) {
-    let r = node.remove();
-    if (r != null && r.registerAt >= 6) {
-      if (eventList[DAMAGE_EVENT.SOURCE].count == 0) {
-        hasSource = false;
-      }
-      if (eventList[DAMAGE_EVENT.LETHAL].count == 0) {
-        hasLethal = false;
-      }
+  return node.addAfter(data);
+}
+
+/**
+ * Remove a given node out of the Damage system
+ * @returns boolean indicate the removal is successful or not
+ */
+export function remove(node: ll.ListNode<DamageTrigger>) {
+  let r = node.remove();
+  if (r != null && r.registerAt >= 4) {
+    if (eventList[DamageEvent.SOURCE].count == 0) {
+      hasSource = false;
     }
-    return r != null;
+    if (eventList[DamageEvent.LETHAL].count == 0) {
+      hasLethal = false;
+    }
   }
+  return r != null;
+}
 
-  // Begin system
+// Begin system
 
-  /**
-   * Call this with flag parameters to either enable or disable the Damage Engine
-   */
-  public static enable(flag: boolean) {
-    if (flag) {
-      if (dreaming) EnableTrigger(t3);
-      else {
-        EnableTrigger(t1);
-        EnableTrigger(t2);
-      }
-      return;
-    }
-
-    if (dreaming) DisableTrigger(t3);
+/**
+ * Call this with flag parameters to either enable or disable the Damage Engine
+ */
+export function enable(flag: boolean) {
+  if (flag) {
+    if (dreaming) EnableTrigger(t3);
     else {
-      DisableTrigger(t1);
-      DisableTrigger(t2);
+      EnableTrigger(t1);
+      EnableTrigger(t2);
     }
+    return;
   }
 
-  /**
-   * Call this to enable current executing damage trigger to run recursively
-   */
-  public static inception() {
-    userIndex.isInception = true;
+  if (dreaming) DisableTrigger(t3);
+  else {
+    DisableTrigger(t1);
+    DisableTrigger(t2);
   }
+}
+
+/**
+ * Call this to enable current executing damage trigger to run recursively
+ */
+export function inception() {
+  userIndex.isInception = true;
 }

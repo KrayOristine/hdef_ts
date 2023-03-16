@@ -1,7 +1,7 @@
 
 
 function shuffleSeed(seed: number[]): number[] {
-    const newSeed = [];
+    const newSeed: number[] = [];
     newSeed[0] = seed[0] * 1664525 + 1013904223;
     return newSeed;
 }

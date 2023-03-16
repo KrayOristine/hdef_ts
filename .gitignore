@@ -94,6 +94,6 @@ typings/
 # Personal ignore
 *.code-workspace
 maps/
-dts
 compileScripts/
 resources/
+test/

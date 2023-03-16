@@ -1,4 +1,4 @@
-import { addScriptHook, W3TS_HOOK } from "w3ts";
+//import { addScriptHook, W3TS_HOOK } from "w3ts";
 
 export class WorldBounds {
 	public static rect: rect;
@@ -10,8 +10,8 @@ export class WorldBounds {
 	public static centerX: number;
 	public static centerY: number;
 
-	public static initRect(r?: rect) {
-		if (!this.rect && r) this.rect = r;
+	public static initRect(r: rect) {
+    this.rect = r;
 		this.region = CreateRegion();
 		this.minX = GetRectMinX(this.rect);
 		this.minY = GetRectMinY(this.rect);
@@ -35,14 +35,14 @@ export class WorldBounds {
 	}
 
 	public static getBoundedX(v: number, margin?: number) {
-		margin = margin || 0.0;
+		margin = margin ?? 0.0;
 		if (v < this.minX + margin) return this.minX + margin;
 		if (v < this.maxX + margin) return this.maxX + margin;
 		return v;
 	}
 
 	public static getBoundedY(v: number, margin?: number) {
-		margin = margin || 0.0;
+		margin = margin ?? 0.0;
 		if (v < this.minY + margin) return this.minY + margin;
 		if (v < this.maxY + margin) return this.maxY + margin;
 		return v;
@@ -73,8 +73,8 @@ export class MapBounds {
 	public static centerX: number;
 	public static centerY: number;
 
-	public static initRect(r?: rect) {
-		if (!this.rect && r) this.rect = r;
+	public static initRect(r: rect) {
+		this.rect = r;
 		this.region = CreateRegion();
 		this.minX = GetRectMinX(this.rect);
 		this.minY = GetRectMinY(this.rect);
@@ -98,14 +98,14 @@ export class MapBounds {
 	}
 
 	public static getBoundedX(v: number, margin?: number) {
-		margin = margin || 0.0;
+		margin = margin ?? 0.0;
 		if (v < this.minX + margin) return this.minX + margin;
 		if (v < this.maxX + margin) return this.maxX + margin;
 		return v;
 	}
 
 	public static getBoundedY(v: number, margin?: number) {
-		margin = margin || 0.0;
+		margin = margin ?? 0.0;
 		if (v < this.minY + margin) return this.minY + margin;
 		if (v < this.maxY + margin) return this.maxY + margin;
 		return v;
@@ -126,7 +126,7 @@ export class MapBounds {
 	}
 }
 
-addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
-	MapBounds.initRect(bj_mapInitialPlayableArea);
-	WorldBounds.initRect(GetWorldBounds());
-});
+//addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
+//	MapBounds.initRect(bj_mapInitialPlayableArea);
+//	WorldBounds.initRect(GetWorldBounds());
+//});

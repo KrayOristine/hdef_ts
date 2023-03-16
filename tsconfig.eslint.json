@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "noEmit": true,
+    "allowJs": true,
     "strict": true,
     "alwaysStrict": false,
     "sourceMap": false,
@@ -14,7 +16,7 @@
       "ESNext"
     ],
     "moduleResolution": "classic",
-    "removeComments": false,
+    "removeComments": true,
     "paths": {
       "*": [
         "../node_modules/*/src/index",
@@ -61,19 +63,9 @@
       "./node_modules"
     ]
   },
+  "extends": "./tsconfig.json",
   "include": [
+    ".eslintrc.cjs",
     "src"
-  ],
-  "exclude": [],
-  "tstl": {
-    "luaTarget": "5.3",
-    "noHeader": true,
-    "luaLibImport": "require-minimal",
-    "noImplicitSelf": true,
-    "luaBundle": "dist/tstl_output.lua",
-    "luaBundleEntry": "./src/game.ts",
-    "sourceMapTraceback": false,
-    "measurePerformance": true,
-    "tstlVerbose": false
-  }
+  ]
 }

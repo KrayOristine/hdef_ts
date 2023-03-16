@@ -1,5 +1,4 @@
-import { Quick } from "wc3-treelib";
-import { loopList }  from "LinkedListLua";
+import * as wex from "./WarEX";
 
 /*
  * Ozzzzymaniac Introduce you a holy List
@@ -70,7 +69,7 @@ export class ListNode<T> {
     }
 
     public static recycle(node: ListNode<any>){
-        if (!Quick.Contains(this._recycleStash, node)) this._recycleStash.push(node);
+        if (!wex.ArrContains(this._recycleStash, node)) this._recycleStash.push(node);
     }
 
     public recycle(): this {
@@ -82,13 +81,6 @@ export class ListNode<T> {
         this._head = head;
         this._value = data;
         return this;
-    }
-
-    public loop(finish?: ListNode<T> ,backward: boolean = false): LuaIterable<ListNode<T>|undefined> | undefined {
-        if (!this._head) error("[LinkedList] - The ListNode does not have a head to begin loop", 2)
-        if (this._head.count == 0) return;
-
-        return this._head.loop(this, finish, backward);
     }
 }
 
@@ -212,11 +204,5 @@ export class LinkedList<T> {
             node = node.next;
         }
         return null;
-    }
-
-    // Below available on TSTL in latest version
-    public loop(start: ListNode<T>, finish?: ListNode<T>, backward: boolean = false): LuaIterable<ListNode<T>|undefined>|undefined {
-        if (this.count == 0) return;
-        return loopList(start, finish, backward);
     }
 }

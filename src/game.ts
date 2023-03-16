@@ -1,4 +1,7 @@
-import { addScriptHook, W3TS_HOOK } from "w3ts/hooks";
+//import * as d from "modules/damage";
+// import * as wex from "shared/WarEX";
+//import { addScriptHook, W3TS_HOOK } from "w3ts/hooks";
+//
 
 const BUILD_DATE = compiletime(() => new Date().toUTCString());
 const TS_VERSION = compiletime(() => require("typescript").version);
@@ -9,7 +12,11 @@ function tsMain() {
 	print(`Typescript: v${TS_VERSION}`);
 	print(`Transpiler: v${TSTL_VERSION}`);
 	print(" ");
-	print("Welcome to TypeScript!");
+
+  // Initialization should be here?
+  // d.Init()
+  // wex.Init();
+  print(orderId.ORDER_ABSORB)
 }
 
-addScriptHook(W3TS_HOOK.MAIN_AFTER, tsMain);
+//addScriptHook(W3TS_HOOK.MAIN_AFTER, tsMain);
