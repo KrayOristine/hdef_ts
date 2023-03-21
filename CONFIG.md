@@ -83,6 +83,10 @@
 
   An object the specify what happen to the maps script after it transpiled into lua. It happen as same as the name on the config implies
 
+- `constantFolding` (`boolean`)
+
+  Enable constant folding
+
 - `minify` (`boolean`)
 
   Minify the scripts after it transpiled

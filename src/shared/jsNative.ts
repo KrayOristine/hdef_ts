@@ -12,7 +12,7 @@ export function TEEncode(input: string) {
 }
 
 export function TEEncodeInto(source: string, target: number[]): boolean {
-  if (!source || !target) return false;
+  if (!source || target == undefined) return false;
   for (let i = 0; i < source.length; i++) target[i] = string.byte(source.substring(i, i));
   return true;
 }

@@ -1,5 +1,17 @@
 type ColorValue = NumberRange<0,256>
 
+/**
+ * Converts a color value to the hex string, making sure that it is 2
+ * characters in length.
+ */
+function toHex(value: ColorValue) {
+  let hex = value.toString(16);
+  if (hex.length < 2) {
+    hex = `0${hex}`;
+  }
+  return hex;
+}
+
 export class Color {
   readonly alpha: ColorValue;
 
@@ -180,16 +192,5 @@ const orderedPlayerColors = [
   PLAYER_COLOR_PEANUT,
 ];
 
-/**
- * Converts a color value to the hex string, making sure that it is 2
- * characters in length.
- */
-function toHex(value: ColorValue) {
-  let hex = value.toString(16);
-  if (hex.length < 2) {
-    hex = `0${hex}`;
-  }
-  return hex;
-}
 
 

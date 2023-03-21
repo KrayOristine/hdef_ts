@@ -8,11 +8,15 @@ const oldGlobal = InitGlobal;
 const oldTrig = InitCustomTriggers;
 const oldInit = RunInitializationTriggers;
 const oldStart = MarkGameStarted;
+const hooksTable: Func<void>[][] = [[],[],[],[],[],[],[],[]];
+const errorStack: string[] = [];
 
 function safeRun(tbl: Func<void>[]){
-  pcall(()=>{
-    tbl.forEach(v=>v());
-  })
+  for (const i of $range(0, tbl.length)){
+    const result = pcall(tbl[i]);
+
+    if (!result[0]) errorStack.push(result[1]);
+  }
 }
 
 _G.main = function(){
@@ -45,18 +49,14 @@ _G.RunInitializationTriggers = function(){
 _G.MarkGameStarted = function(){
   oldStart();
   safeRun(hooksTable[3])
+  if (errorStack.length > 0){
+    for (const i of $range(0, errorStack.length)){
+      print(errorStack[i]);
+    }
+  }
 }
 
-const hooksTable: Func<void>[][] = [
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  [],
-  []
-];
+
 
 
 export function global(func: Func<void>){
@@ -74,7 +74,6 @@ export function map(func: Func<void>){
 export function final(func: Func<void>){
   hooksTable[3].push(func);
 }
-
 
 // for nerds
 

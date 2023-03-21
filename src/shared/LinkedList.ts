@@ -53,7 +53,7 @@ export class ListNode<T> {
 
         this.next = undefined;
         this.prev = undefined;
-        this._head.count -= 1;
+        this._head.count = this._head.count - 1;
         this.recycle();
 
         return this.value;
@@ -103,7 +103,7 @@ export class LinkedList<T> {
 
         if (this.last == null) this.last = newNode;
 
-        this.count++;
+        this.count = this.count + 1;
         return newNode;
     }
 
@@ -114,7 +114,7 @@ export class LinkedList<T> {
 
         if (this.last == null) this.last = node;
 
-        this.count++;
+        this.count = this.count + 1;
         return node;
     }
 
@@ -125,7 +125,7 @@ export class LinkedList<T> {
         newNode.prev = this.last;
         this.last = newNode;
 
-        this.count++;
+        this.count = this.count + 1;
 
         return newNode;
     }
@@ -151,7 +151,7 @@ export class LinkedList<T> {
         newNode.prev = whichNode;
         whichNode.next = newNode;
 
-        this.count++;
+        this.count = this.count + 1;
         return newNode;
     }
 
@@ -163,7 +163,7 @@ export class LinkedList<T> {
         node.prev = whichNode;
         whichNode.next = node;
 
-        this.count++;
+        this.count = this.count + 1;
         return node;
     }
 

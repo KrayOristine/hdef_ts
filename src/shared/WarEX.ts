@@ -1,6 +1,7 @@
 //! KEEP 0 DEPENDENCIES FROM OTHER SOURCES
 
 import * as js from "./jsNative"; // Polyfill for natives JS environ
+import * as h from "./hooks";
 
 /*
  * A file contain all useful utility function for maps development
@@ -15,11 +16,13 @@ let zeroLoc: location;
 export let safeFilter: boolexpr;
 export let safeCondition: boolexpr;
 
-export function Init(){
+function Init(){
   zeroLoc = Location(0,0);
 	safeFilter = Filter(function(){return true})
 	safeCondition = Condition(function(){return true});
 }
+
+h.mainBefore(Init);
 
 // Utility for LuaTable
 export function LuaTableContains<T2>(table: LuaTable<number,T2>, data: T2): boolean {

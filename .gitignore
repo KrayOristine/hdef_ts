@@ -91,9 +91,14 @@ typings/
 # DynamoDB Local files
 .dynamodb/
 
-# Personal ignore
+# .exe files
+*.exe
+*.pdb
+
+# VS Code workspace
 *.code-workspace
+
+# Hidden
 maps/
-compileScripts/
 resources/
 test/

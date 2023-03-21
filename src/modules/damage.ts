@@ -1,5 +1,6 @@
 import * as ll from "../shared/LinkedList";
 import * as js from "../shared/jsNative";
+import * as h from "../shared/hooks";
 
 /*
  * Introducing to you a ported version of Bribe Damage Engine on TS that have almost same functionality as the original one
@@ -180,7 +181,7 @@ const damageImmune = [
 function runEvent(v: DamageEvent) {
   let head = eventList[v];
   let check = breakCheck[v];
-  if (dreaming || !head || check() || head.first == null) return;
+  if (dreaming || head == null || check() || head.first == null) return;
 
   let node = head.first;
   enable(false);
@@ -235,7 +236,7 @@ function addRecursive(d: DamageInstance) {
   d.recursive = userIndex;
   recursiveStacks.push(d);
 
-  if (!kicking && !recursiveSource.get(d.source) && !recursiveTarget.get(d.target)) return;
+  if (!kicking && recursiveSource.get(d.source) == undefined && recursiveTarget.get(d.target) == undefined) return;
 
   if (!userIndex.isFrozen) {
     userIndex.isFrozen = true;
@@ -457,12 +458,7 @@ function __trigger3_action(): boolean {
   return false;
 }
 
-/**
- * DO NOT CALL THIS!
- *
- * @private This is intended to be called from initialization system
- */
-export function Init() {
+function Init() {
   alarm = CreateTimer();
   t1 = CreateTrigger();
   t2 = CreateTrigger();
@@ -479,6 +475,8 @@ export function Init() {
   TriggerAddCondition(t3, Condition(__trigger3_action));
   DisableTrigger(t3);
 }
+
+h.mainBefore(Init);
 
 /**
  * Register a new listener that will fired on specific event

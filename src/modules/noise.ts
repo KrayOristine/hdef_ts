@@ -1,5 +1,3 @@
-
-
 function shuffleSeed(seed: number[]): number[] {
     const newSeed: number[] = [];
     newSeed[0] = seed[0] * 1664525 + 1013904223;
@@ -9,7 +7,7 @@ const NORM_2D = 1.0 / 47.0;
 const SQUISH_2D = (Math.sqrt(2 + 1) - 1) / 2;
 const STRETCH_2D = (1 / Math.sqrt(2 + 1) - 1) / 2;
 
-export type Noise2D = (x: number, y: number) => number;
+type Noise2D = (x: number, y: number) => number;
 
 interface Contribution2D {
   dx: number;
@@ -124,75 +122,8 @@ const base2D = [
   [1, 1, 0, 1, 0, 1, 2, 1, 1],
 ];
 
-const gradients2D = [
-  5,
-  2,
-  2,
-  5,
-  -5,
-  2,
-  -2,
-  5,
-  5,
-  -2,
-  2,
-  -5,
-  -5,
-  -2,
-  -2,
-  -5,
-];
+const gradients2D = [5,  2,  2,  5,  -5,  2,  -2,  5,  5,  -2,  2,  -5,  -5,  -2,  -2,  -5];
 
-const lookupPairs2D = [
-  0,
-  1,
-  1,
-  0,
-  4,
-  1,
-  17,
-  0,
-  20,
-  2,
-  21,
-  2,
-  22,
-  5,
-  23,
-  5,
-  26,
-  4,
-  39,
-  3,
-  42,
-  4,
-  43,
-  3,
-];
+const lookupPairs2D = [0,  1,  1,  0,  4,  1,  17,  0,  20,  2,  21,  2,  22,  5,  23,  5,  26,  4,  39,  3,  42,  4,  43,  3];
 
-const p2D = [
-  0,
-  0,
-  1,
-  -1,
-  0,
-  0,
-  -1,
-  1,
-  0,
-  2,
-  1,
-  1,
-  1,
-  2,
-  2,
-  0,
-  1,
-  2,
-  0,
-  2,
-  1,
-  0,
-  0,
-  0,
-];
+const p2D = [0,  0,  1,  -1,  0,  0,  -1,  1,  0,  2,  1,  1,  1,  2,  2,  0,  1,  2,  0,  2,  1,  0,  0,  0];

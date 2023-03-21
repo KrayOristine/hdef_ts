@@ -18,6 +18,7 @@
 - Improved `compiletime`
 - Improved compilation time (should now a bit faster, excluded tstl compile time improvement)
 - Maps build now automatically grab resources from `resources` folder
+- FourCC inlining
 - Built-in constant folding/propagation
 - Built-in maps protection and script optimization
 

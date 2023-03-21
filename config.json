@@ -4,6 +4,7 @@
         "outDir": ".",
 
         "scripts": {
+            "constantFolding": true,
             "minify": false,
             "optimize": false,
             "encrypt": {

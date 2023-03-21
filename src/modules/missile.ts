@@ -1,4 +1,5 @@
 import * as wex from "shared/WarEX";
+import * as wb from "shared/worldBounds";
 
 /*
  * Missile - copy pasted from WCSharp
@@ -355,10 +356,22 @@ export abstract class Missile {
     if (this._effect != null) DestroyEffect(this._effect);
     if (this._group != null) DestroyGroup(this._group);
   }
+
+  /**
+   * This is a shorthand for firing a given missile instead of doing
+   *
+   * ```ts
+   *  const ms = new Missile();
+   *
+   * //... configuration, etc.
+   *
+   *  AddToSystem(ms)
+   * ```
+   */
+  public cast(){
+    AddToSystem(this);
+  }
 }
-
-
-
 
 
 /**
@@ -407,6 +420,28 @@ export abstract class BasicMissile extends Missile {
    */
   public arc: number = 0;
 
+  public reactiveArc(){
+    if (!this._followTerrain && this.arc == 0) return;
+
+    this._followTerrain = false;
+    this.targetZ += wex.GetZ(this.targetX, this.targetY);
+    this.missileZ += wex.GetZ(this.missileX, this.missileY);
+    this.casterX = this.missileX;
+    this.casterY = this.missileY;
+    this.casterZ = this.missileZ;
+    this._launchZ = 0;
+    this._distanceToTarget = wex.DistanceBetweenPoints(this.casterX, this.casterY, this.targetX, this.targetY);
+  }
+
+  public disableArc(){
+    if (this._followTerrain) return;
+
+    this._followTerrain = true;
+    this.casterZ -= wex.GetZ(this.casterX, this.casterY);
+    this.targetZ -= wex.GetZ(this.targetX, this.targetY);
+    this.missileZ -= wex.GetZ(this.missileX, this.missileY);
+  }
+
   constructor(casterX: number, casterY: number, casterUnit: unit, targetX?: number, targetY?: number, targetUnit?: unit){
     super(casterX, casterY, casterUnit, targetX, targetY, targetUnit);
   }
@@ -454,10 +489,8 @@ export abstract class BasicMissile extends Missile {
       }
     }
 
-    if (wex.DistanceBetweenPoints(this.missileX, this.missileY, this.targetX, this.targetY) < this.speed + this.impactLeeway){
-      this.runImpact();
-      return;
-    }
+    if (wex.DistanceBetweenPoints(this.missileX, this.missileY, this.targetX, this.targetY) < this.speed + this.impactLeeway) return this.runImpact();
+
 
     const num = this.missileZ;
     if (this._followTerrain){
@@ -465,12 +498,138 @@ export abstract class BasicMissile extends Missile {
     } else {
       const num2 = wex.DistanceBetweenPoints(this.casterX, this.casterY, this.targetX, this.targetY);
       if (Math.abs(this._distanceToTarget - num2) > 50){
-        //this.disableArc();
+        this.disableArc();
       } else {
         this._distanceToTarget = num2;
         const num3 = wex.DistanceBetweenPoints(this.casterX, this.casterY, this.missileX, this.missileY) / num2;
         this.missileZ = this.casterZ + num3 * (this.targetZ - this.casterZ) + num2 * this.arc * Math.sin(num3 * Math.PI);
       }
     }
+    this.yaw = wex.AngleBetweenPointsRadD(this.missileX, this.missileY, this.targetX, this.targetY);
+    const num4 = this.speed * Math.cos(this.yaw);
+    const num5 = this.speed * Math.sin(this.yaw)
+    this.missileX += num4;
+    this.missileY += num5;
+
+    if (wb.WorldBounds.containsXY(this.missileX, this.missileY)) return this.exitWorldBounds();
+
+    if (this._effect != null){
+      this.roll += this.spinPeriod;
+      const num6 = this.missileZ;
+      this.pitch = Math.atan2(num - num6, Math.sqrt(num4 * num4 + num5 * num5));
+      BlzSetSpecialEffectPosition(this._effect, this.missileX, this.missileY, num6);
+			BlzSetSpecialEffectOrientation(this._effect, this.yaw, this.pitch, this.roll);
+    }
+
+    if (this.interval > 0) this.runInterval();
+
+    if (this._collisionRadius > 0) this.runCollisions();
+  }
+}
+
+/**
+ *  Homing missile with a fixed speed that will attempt to aim itself at the target, restricted by turn speed.
+ *
+ *  Note: Does not have any behaviour to avoid endlessly circling the enemy.
+ *  I recommend using it with a collision radius or such so that exact collisions aren't required.
+ */
+export abstract class HomingMissile extends Missile {
+  private _turnRate: number;
+
+  public get turnRate(): number {
+    console.log("taejhaetjaetj");
+    return this._turnRate * (180 / Math.PI) / (1 / 32);
+  }
+  public set turnRate(value: number){
+    this._turnRate = value * (Math.PI / 180) * (1 / 32)
+    console.log("testsethathaetj");
+  }
+
+  public initialAngle?: number;
+
+  constructor(casterX: number, casterY: number, casterUnit: unit, targetX?: number, targetY?: number, targetUnit?: unit){
+    super(casterX, casterY, casterUnit, targetX, targetY, targetUnit);
+    this._turnRate = 0;
+  }
+
+  /**
+   * DO NOT OVERRIDE THIS METHOD!
+   *
+   * @ignore
+   */
+  public override launch(): void {
+    this.casterZ += this._launchZ;
+		this.targetZ += this.targetImpactZ;
+		this.missileX = this.casterX;
+		this.missileY = this.casterY;
+		this.missileZ = this.casterZ;
+    if (this.initialAngle == null) {
+      this.yaw = wex.AngleBetweenPointsRadD(this.casterX, this.casterY, this.targetX, this.targetY)
+    } else {
+      this.yaw = this.initialAngle * (Math.PI / 180)
+      if (this.yaw < 0) this.yaw += Math.PI * 2;
+			else if (this.yaw > Math.PI * 2) this.yaw -= Math.PI * 2;
+    }
+
+    this.intervalLeft = this.interval;
+		if (this._effectPath != "")
+		{
+			this._effect = AddSpecialEffect(this._effectPath, this.missileX, this.missileY) as effect;
+			BlzSetSpecialEffectZ(this._effect, this.missileZ);
+			if (this.effectScale != 1)
+			{
+				BlzSetSpecialEffectScale(this._effect, this.effectScale);
+			}
+		}
+  }
+
+  /**
+   * DO NOT OVERRIDE THIS METHOD!
+   *
+   * @ignore
+   */
+  public override action(){
+		if (this.target != null)
+		{
+			if (UnitAlive(this.target)){
+				this.targetX = GetUnitX(this.target);
+				this.targetY = GetUnitY(this.target);
+				this.targetZ = GetUnitFlyHeight(this.target) + this.targetImpactZ;
+			} else {
+				this.target = undefined;
+			}
+		}
+		if (wex.DistanceBetweenPoints(this.missileX, this.missileY, this.targetX, this.targetY) < this.speed + this.impactLeeway){
+			return this.runImpact();
+		}
+
+    let num = this.missileZ;
+		let num2 = wex.AngleBetweenPointsRadD(this.missileX, this.missileY, this.targetX, this.targetY);
+
+    if (Math.abs(num2 - this.yaw) < this.turnRate) this.yaw = num2;
+		else if ((this.yaw < num2 && num2 < this.yaw + Math.PI) || num2 < this.yaw - Math.PI) this.yaw += this.turnRate;
+		else this.yaw -= this.turnRate;
+
+		if (this.yaw < 0) this.yaw += Math.PI * 2;
+		else if (this.yaw > Math.PI * 2) this.yaw -= Math.PI * 2;
+
+		let num3 = this.speed * Cos(this.yaw);
+		let num4 = this.speed * Sin(this.yaw);
+		this.missileX += num3;
+		this.missileY += num4;
+		this.missileZ += (this.targetZ - this.missileZ) * (this.speed / wex.DistanceBetweenPoints(this.missileX, this.missileY, this.targetX, this.targetY));
+		if (!wb.WorldBounds.containsXY(this.missileX, this.missileY)){
+			this.exitWorldBounds();
+			return;
+		}
+		if (this._effect != null){
+			this.roll += this.spinPeriod;
+			let num5 = this.missileZ;
+			this.pitch = Atan2(num - num5, SquareRoot(num3 * num3 + num4 * num4));
+			BlzSetSpecialEffectPosition(this._effect, this.missileX, this.missileY, num5);
+			BlzSetSpecialEffectOrientation(this._effect, this.yaw, this.pitch, this.roll);
+		}
+		if (this.interval > 0) this.runInterval();
+		if (this.collisionRadius > 0) this.runCollisions();
   }
 }

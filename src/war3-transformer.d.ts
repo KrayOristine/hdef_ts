@@ -10,13 +10,13 @@ declare interface compiletimeContext {
   log: (...args: any) => void;
 }
 
-type compiletimeResult = string | boolean | number | object | undefined | null;
+type compiletimeResult = string | object | undefined | null;
 
 /**
  * Define a function that will be run on compile time in Node environment.
  * It will also return any value that the function defined return
  *
- * @returns string | boolean | number | object | undefined | null
+ * @returns string | object | undefined | null
  * @note Any other return type is considered never
  * @since 0.0.3
  */
@@ -41,6 +41,6 @@ declare function FourCCArray(code: string[]): number[];
 /**
  * Try to convert a string into warcraft object id
  *
- * @note This will ignore the length and will be converted in compiletime
+ * @note This will ignore the length limit and will be converted in compiletime
  */
 declare function FourCCPure(code: string): number;

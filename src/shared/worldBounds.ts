@@ -1,4 +1,4 @@
-//import { addScriptHook, W3TS_HOOK } from "w3ts";
+import * as h from "./hooks";
 
 export class WorldBounds {
 	public static rect: rect;
@@ -126,7 +126,7 @@ export class MapBounds {
 	}
 }
 
-//addScriptHook(W3TS_HOOK.MAIN_AFTER, () => {
-//	MapBounds.initRect(bj_mapInitialPlayableArea);
-//	WorldBounds.initRect(GetWorldBounds());
-//});
+h.mainAfter(() => {
+	MapBounds.initRect(bj_mapInitialPlayableArea as rect);
+	WorldBounds.initRect(GetWorldBounds() as rect);
+});
