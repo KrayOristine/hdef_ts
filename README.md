@@ -1,6 +1,8 @@
 
 # Ozzzzymaniac - Mushroom Defense
 
+>**NOTE**: This repos has been abandoned, please refer to [**CSharp**](https://github.com/KrayOristine/hdef_cs) version of this map project for further update. The reason behind this it because i have hit the limit with the **TypeScript To Lua** transpiler
+
  A warcraft 3 reforged defense maps that coded in [**TypeScript**](https://github.com/microsoft/TypeScript/) and powered by [**TypeScript to Lua**](https://github.com/TypeScriptToLua/TypeScriptToLua)
 
  Current version: 0.0.4
